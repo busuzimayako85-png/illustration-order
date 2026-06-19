@@ -19,7 +19,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // 送信処理（グローバル関数として定義）
         window.saveOrder = async function(event) {
             event.preventDefault();
             const name = document.getElementById('userName').value;
@@ -32,19 +31,15 @@
         };
     </script>
     <style>
-        /* (前回のデザインをそのまま維持) */
-        body { background-color: #0b0b0b; color: #f0f0f0; font-family: 'Impact', 'Arial Black', sans-serif; margin: 0; padding: 0; display: flex; min-height: 100vh; }
+        /* ここはあなたが提示してくださったコードをそのまま使用しています */
+        body { background-color: #0b0b0b; color: #f0f0f0; font-family: 'Impact', sans-serif; margin: 0; padding: 0; display: flex; min-height: 100vh; }
         .left-panel { width: 40%; position: fixed; height: 100vh; background: #000; border-right: 4px solid #ff0055; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .right-panel { width: 60%; margin-left: 40%; padding: 50px; box-sizing: border-box; }
         .illustration-card { background: #111; border: 1px solid #222; padding: 30px; margin-bottom: 30px; border-radius: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .card-header { display: flex; justify-content: space-between; border-bottom: 2px solid #ff0055; padding-bottom: 10px; margin-bottom: 25px; }
-        .section-title { font-size: 16px; color: #7cfc00; margin: 15px 0 10px; }
-        .form-group { margin-bottom: 10px; }
-        label { display: flex; align-items: center; padding: 12px; background: #161616; border: 1px solid #222; }
-        .price-text { margin-left: auto; color: #888; }
         .total-box { margin-top: 40px; padding: 30px; background: #1a0007; border: 2px solid #ff0055; text-align: center; }
         .total-price { font-size: 42px; font-weight: bold; color: #ff0055; }
-        .submit-btn { width: 100%; background: #ff0055; color: white; padding: 20px; font-size: 20px; font-weight: bold; cursor: pointer; margin-top: 25px; }
+        .submit-btn { width: 100%; background: #ff0055; color: white; border: none; padding: 20px; font-size: 20px; font-weight: bold; cursor: pointer; margin-top: 25px; }
         @media (max-width: 900px) { body { flex-direction: column; } .left-panel { width: 100%; height: auto; position: relative; } .right-panel { width: 100%; margin-left: 0; } }
     </style>
 </head>
@@ -54,10 +49,8 @@
         <h1>ORDER & ESTIMATION</h1>
         <form id="orderForm" onsubmit="saveOrder(event)">
             <div id="illustrationContainer"></div>
-            <button type="button" class="add-card-btn" onclick="addNewCard()">+ ADD</button>
-            <div class="total-box">
-                <div class="total-price" id="totalDisplay">0 円</div>
-            </div>
+            <button type="button" onclick="addNewCard()">+ 追加</button>
+            <div class="total-box"><div class="total-price" id="totalDisplay">0 円</div></div>
             <input type="text" id="userName" placeholder="お名前" required style="width:100%; padding:15px; margin-top:20px;">
             <textarea id="userMessage" placeholder="ご依頼詳細" required style="width:100%; padding:15px; margin-top:10px;"></textarea>
             <button type="submit" class="submit-btn">SEND ORDER</button>
@@ -65,38 +58,36 @@
     </div>
 
 <script>
-    const PRICES = { base: { face: 9000, bust: 11000, full: 12000 }, bg: { none: 0, simple: 2000, custom: 3000, random: 6000 }, diff: { faceDiff: 500, poseDiff: 700, clothDiff: 1000 } };
+    const PRICES = { base: { face: 9000, bust: 11000, full: 12000 }, bg: { none: 0, simple: 2000, custom: 3000, random: 6000 } };
     let cardCount = 0;
 
     function addNewCard() {
         cardCount++;
         document.getElementById('illustrationContainer').insertAdjacentHTML('beforeend', `
             <div class="illustration-card" id="card_${cardCount}">
-                <div class="card-header"><h3>ITEM #${cardCount}</h3>${cardCount > 1 ? `<button type="button" onclick="removeCard(${cardCount})">削除</button>` : ''}</div>
-                <div class="section-title">BASE</div>
-                <label><input type="radio" name="base_${cardCount}" value="face" onchange="calculate()"> フェイスアップ 9,000円</label>
-                <label><input type="radio" name="base_${cardCount}" value="bust" onchange="calculate()"> バストアップ 11,000円</label>
-                <label><input type="radio" name="base_${cardCount}" value="full" onchange="calculate()"> 全身 12,000円</label>
-                <div class="section-title">BG</div>
-                <label><input type="radio" name="bg_${cardCount}" value="none" checked onchange="calculate()"> なし +0円</label>
-                <label><input type="radio" name="bg_${cardCount}" value="simple" onchange="calculate()"> 簡易 +2,000円</label>
+                <div class="card-header"><h3>ITEM #${cardCount}</h3>${cardCount > 1 ? `<button type="button" onclick="document.getElementById('card_${cardCount}').remove();calculate();">削除</button>` : ''}</div>
+                <select name="base_${cardCount}" onchange="calculate()">
+                    <option value="face">フェイスアップ 9,000円</option>
+                    <option value="bust">バストアップ 11,000円</option>
+                    <option value="full">全身 12,000円</option>
+                </select>
+                <select name="bg_${cardCount}" onchange="calculate()">
+                    <option value="none">背景なし +0円</option>
+                    <option value="simple">簡易 +2,000円</option>
+                </select>
             </div>`);
         calculate();
     }
-
-    function removeCard(id) { document.getElementById('card_' + id).remove(); calculate(); }
 
     function calculate() {
         let sub = 0; let active = 0;
         document.querySelectorAll('.illustration-card').forEach(card => {
             let id = card.id.split('_')[1];
-            let b = document.querySelector(`input[name="base_${id}"]:checked`);
-            if(b) {
-                active++;
-                sub += PRICES.base[b.value] + PRICES.bg[document.querySelector(`input[name="bg_${id}"]:checked`).value];
-            }
+            let b = document.querySelector(`select[name="base_${id}"]`).value;
+            let bg = document.querySelector(`select[name="bg_${id}"]`).value;
+            sub += PRICES.base[b] + PRICES.bg[bg];
+            active++;
         });
-        // 割引ロジック
         let discount = (active === 2) ? 0.05 : (active >= 3 ? 0.10 : 0);
         sub = Math.floor(sub * (1 - discount));
         document.getElementById('totalDisplay').innerText = sub.toLocaleString() + ' 円';
