@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>busuzimayako85 OFFICIAL ORDER SITE</title>
+    <title>ORDER & ESTIMATION</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
@@ -31,102 +31,66 @@
         };
     </script>
     <style>
-        body { background-color: #0b0b0b; color: #f0f0f0; font-family: 'Impact', 'Arial Black', 'Hiragino Kaku Gothic ProN', sans-serif; margin: 0; padding: 0; display: flex; min-height: 100vh; }
-        .left-panel { width: 40%; position: fixed; top: 0; left: 0; height: 100vh; background: #000000; display: flex; flex-direction: column; justify-content: center; align-items: center; border-right: 4px solid #ff0055; box-sizing: border-box; padding: 4px; }
-        .logo-area { width: 80%; max-width: 350px; aspect-ratio: 1; background: #111; border: 2px dashed #7cfc00; display: flex; justify-content: center; align-items: center; color: #555; text-align: center; margin-bottom: 20px; box-shadow: 0 0 20px rgba(255, 0, 85, 0.2); }
-        .info-text { color: #7cfc00; font-size: 14px; letter-spacing: 2px; text-shadow: 0 0 5px rgba(124, 252, 0, 0.5); margin-bottom: 10px; }
-        .right-panel { width: 60%; margin-left: 40%; padding: 50px; box-sizing: border-box; }
-        .illustration-card { background: #111; border: 1px solid #222; padding: 30px; margin-bottom: 30px; border-radius: 6px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ff0055; padding-bottom: 10px; margin-bottom: 25px; }
-        .card-title { font-size: 20px; color: #ffffff; margin: 0; letter-spacing: 1px; }
-        .remove-card-btn { background: none; border: 1px solid #ff0055; color: #ff0055; cursor: pointer; padding: 5px 10px; font-size: 12px; font-weight: bold; }
-        .remove-card-btn:hover { background: #ff0055; color: #fff; }
-        .section-title { font-size: 16px; color: #7cfc00; margin-top: 25px; margin-bottom: 12px; letter-spacing: 1px; text-transform: uppercase; }
-        .options-wrapper { position: relative; }
-        .options-wrapper.locked { opacity: 0.2; pointer-events: none; user-select: none; }
-        .schedule-box { background: #151515; border: 1px solid #333; padding: 20px; border-radius: 4px; margin-bottom: 30px; }
-        .form-group { margin-bottom: 10px; }
-        label { display: flex; align-items: center; cursor: pointer; padding: 12px 15px; background: #161616; border-radius: 4px; border: 1px solid #222; font-size: 14px; }
-        label:hover { background: #222; border-color: #ff0055; }
-        input[type="radio"]:checked + span, input[type="checkbox"]:checked + span { color: #7cfc00; }
-        .price-text { margin-left: auto; color: #888; font-weight: bold; }
-        .qty-container { display: flex; align-items: center; margin-top: 8px; padding-left: 30px; }
-        .qty-btn { background: #222; color: #fff; border: 1px solid #444; width: 28px; height: 28px; cursor: pointer; font-weight: bold; }
-        .qty-input { width: 40px; text-align: center; background: #000; color: #7cfc00; border: 1px solid #333; height: 26px; font-size: 14px; }
-        .btn-row { display: flex; gap: 10px; margin-top: 10px; }
-        .add-card-btn { flex: 2; background: #000; color: #7cfc00; border: 2px dashed #7cfc00; padding: 15px; font-weight: bold; cursor: pointer; }
-        .clear-btn { flex: 1; background: #222; color: #aaa; border: 1px solid #444; cursor: pointer; }
-        .total-box { margin-top: 40px; padding: 30px; background: #1a0007; border: 2px solid #ff0055; text-align: center; }
-        .total-price { font-size: 42px; font-weight: bold; color: #ff0055; }
-        .order-form { margin-top: 30px; padding: 20px; background: #111; border: 1px solid #333; }
-        .submit-btn { width: 100%; background: #ff0055; color: white; border: none; padding: 20px; font-size: 20px; font-weight: bold; cursor: pointer; margin-top: 15px; }
-        @media (max-width: 900px) { body { flex-direction: column; } .left-panel { width: 100%; height: auto; position: relative; } .right-panel { width: 100%; margin-left: 0; } }
+        body { background-color: #0b0b0b; color: #f0f0f0; font-family: sans-serif; margin: 0; padding: 20px; display: flex; }
+        .right-panel { width: 100%; max-width: 800px; margin: auto; }
+        .illustration-card { background: #111; border: 1px solid #333; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+        .card-header { display: flex; justify-content: space-between; border-bottom: 2px solid #ff0055; margin-bottom: 15px; }
+        .total-box { margin-top: 30px; padding: 20px; border: 2px solid #ff0055; text-align: center; font-size: 24px; }
+        .submit-btn { width: 100%; padding: 15px; background: #ff0055; border: none; color: white; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="left-panel">
-        <div class="logo-area"><p>[ ロゴ ]</p></div>
-        <div class="info-text">busuzimayako85</div>
-    </div>
     <div class="right-panel">
         <h1>ORDER & ESTIMATION</h1>
-        <div class="schedule-box">【NOTICE】現在受付中</div>
-        <form id="orderForm">
-            <div id="illustrationContainer"></div>
-            <div class="btn-row">
-                <button type="button" id="addCardBtn" class="add-card-btn" onclick="addNewCard()">+ ADD</button>
-                <button type="button" class="clear-btn" onclick="resetForm()">CLEAR</button>
-            </div>
-            <div class="total-box">
-                <div>ESTIMATED TOTAL</div>
-                <div class="total-price" id="totalDisplay">0 円</div>
-            </div>
-            <div class="order-form">
-                <h3>CUSTOMER INFO</h3>
-                <input type="text" id="userName" placeholder="お名前">
-                <textarea id="userMessage" placeholder="ご依頼詳細" rows="4"></textarea>
-                <button type="button" class="submit-btn" onclick="sendOrder()">SEND ORDER</button>
-            </div>
-        </form>
+        <div id="illustrationContainer"></div>
+        <button onclick="addNewCard()">+ 追加</button>
+        <button onclick="resetForm()">全クリア</button>
+        <div class="total-box">合計: <span id="totalDisplay">0 円</span></div>
+        <div style="margin-top:20px;">
+            <input type="text" id="userName" placeholder="お名前" style="width:100%; padding:10px;"><br><br>
+            <textarea id="userMessage" placeholder="ご依頼詳細" style="width:100%; padding:10px;"></textarea>
+            <button class="submit-btn" onclick="sendOrder()">SEND ORDER</button>
+        </div>
     </div>
+
 <script>
-    const PRICES = { base: { face: 9000, bust: 11000, full: 12000 }, bg: { none: 0, simple: 2000, custom: 3000, random: 6000 }, diff: { faceDiff: 500, poseDiff: 700, clothDiff: 1000 } };
+    const PRICES = { base: { face: 9000, bust: 11000, full: 12000 }, bg: { none: 0, simple: 2000, custom: 3000, random: 6000 }, diff: 500 };
     let cardCount = 0;
+
     function addNewCard() {
         cardCount++;
-        document.getElementById('illustrationContainer').insertAdjacentHTML('beforeend', `
-            <div class="illustration-card" id="card_${cardCount}">
-                <div class="card-header"><h3 class="card-title">ILLUSTRATION #${cardCount}</h3>${cardCount>1?`<button type="button" class="remove-card-btn" onclick="removeCard(${cardCount})">削除</button>`:''}</div>
-                <div class="section-title">01. BASE TYPE</div>
-                <div class="form-group"><label><input type="radio" name="base_${cardCount}" value="face" onchange="onBaseSelect(${cardCount})"> <span>フェイスアップ</span> <span class="price-text">9,000円</span></label></div>
-                <div class="form-group"><label><input type="radio" name="base_${cardCount}" value="bust" onchange="onBaseSelect(${cardCount})"> <span>バストアップ</span> <span class="price-text">11,000円</span></label></div>
-                <div class="form-group"><label><input type="radio" name="base_${cardCount}" value="full" onchange="onBaseSelect(${cardCount})"> <span>全身</span> <span class="price-text">12,000円</span></label></div>
-                <div class="options-wrapper locked" id="optionsWrapper_${cardCount}">
-                    <div class="section-title">02. BACKGROUND</div>
-                    <div class="form-group"><label><input type="radio" name="bg_${cardCount}" value="none" checked onchange="calculate()"> <span>背景なし</span> <span class="price-text">+0円</span></label></div>
-                    <div class="form-group"><label><input type="radio" name="bg_${cardCount}" value="simple" onchange="calculate()"> <span>簡易背景</span> <span class="price-text">+2,000円</span></label></div>
-                    <div class="form-group"><label><input type="radio" name="bg_${cardCount}" value="custom" onchange="calculate()"> <span>指定背景</span> <span class="price-text">+3,000円</span></label></div>
-                    <div class="form-group"><label><input type="radio" name="bg_${cardCount}" value="random" onchange="calculate()"> <span>おまかせ背景</span> <span class="price-text">+6,000円</span></label></div>
-                    <div class="section-title">03. OPTIONS</div>
-                    ${['faceDiff','poseDiff','clothDiff'].map((t,i)=>`<div class="form-group"><label><input type="checkbox" id="${t}Check_${cardCount}" onchange="toggleQty(${cardCount},'${t}')"> <span>${['表情','ポーズ','服装'][i]}差分</span> <span class="price-text">+${[500,700,1000][i]}円</span></label><div class="qty-container"><button type="button" class="qty-btn" onclick="changeQty(${cardCount},'${t}',-1)">-</button><input type="text" id="${t}Qty_${cardCount}" class="qty-input" value="0" readonly><button type="button" class="qty-btn" onclick="changeQty(${cardCount},'${t}',1)">+</button></div></div>`).join('')}
-                </div>
-            </div>`);
+        const div = document.createElement('div');
+        div.className = 'illustration-card';
+        div.id = 'card_' + cardCount;
+        div.innerHTML = `
+            <div class="card-header"><h3>ITEM #${cardCount}</h3><button onclick="removeCard(${cardCount})">削除</button></div>
+            <select name="base" onchange="calculate()">
+                <option value="face">フェイスアップ (9,000円)</option>
+                <option value="bust">バストアップ (11,000円)</option>
+                <option value="full">全身 (12,000円)</option>
+            </select>
+            <select name="bg" onchange="calculate()">
+                <option value="none">背景なし (+0円)</option>
+                <option value="simple">簡易 (+2,000円)</option>
+                <option value="custom">指定 (+3,000円)</option>
+                <option value="random">おまかせ (+6,000円)</option>
+            </select>
+            <div><label><input type="checkbox" name="diff" onchange="calculate()"> 差分追加 (+500円)</label></div>
+        `;
+        document.getElementById('illustrationContainer').appendChild(div);
         calculate();
     }
-    function resetForm() { document.getElementById('illustrationContainer').innerHTML = ''; cardCount = 0; addNewCard(); }
-    function removeCard(id) { document.getElementById(`card_${id}`).remove(); calculate(); }
-    function onBaseSelect(id) { document.getElementById(`optionsWrapper_${id}`).classList.remove('locked'); calculate(); }
-    function changeQty(id, type, val) { const c = document.getElementById(`${type}Check_${id}`); if(!c.checked) return; const i = document.getElementById(`${type}Qty_${id}`); i.value = Math.max(0, parseInt(i.value)+val); calculate(); }
-    function toggleQty(id, type) { const c = document.getElementById(`${type}Check_${id}`); const i = document.getElementById(`${type}Qty_${id}`); i.value = c.checked ? (i.value==0?1:i.value) : 0; calculate(); }
+
+    function removeCard(id) { document.getElementById('card_' + id).remove(); calculate(); }
+    function resetForm() { document.getElementById('illustrationContainer').innerHTML = ''; cardCount = 0; calculate(); }
+
     function calculate() {
         let sub = 0;
-        document.querySelectorAll('.illustration-card').forEach(c => {
-            let id = c.id.split('_')[1];
-            let b = document.querySelector(`input[name="base_${id}"]:checked`), bg = document.querySelector(`input[name="bg_${id}"]:checked`);
-            if(b) {
-                sub += PRICES.base[b.value] + PRICES.bg[bg.value];
-                ['faceDiff','poseDiff','clothDiff'].forEach(t => { if(document.getElementById(`${t}Check_${id}`).checked) sub += PRICES.diff[t] * document.getElementById(`${t}Qty_${id}`).value; });
-            }
+        document.querySelectorAll('.illustration-card').forEach(card => {
+            const base = card.querySelector('select[name="base"]').value;
+            const bg = card.querySelector('select[name="bg"]').value;
+            const diff = card.querySelector('input[name="diff"]').checked ? PRICES.diff : 0;
+            sub += PRICES.base[base] + PRICES.bg[bg] + diff;
         });
         document.getElementById('totalDisplay').innerText = sub.toLocaleString() + ' 円';
     }
