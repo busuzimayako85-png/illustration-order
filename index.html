@@ -4,96 +4,219 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>busuzimayako85 OFFICIAL ORDER SITE</title>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDi4twz34suKR2KXztm19FbUF-dtJN4OQU",
-            authDomain: "busuzimayako85-order.firebaseapp.com",
-            projectId: "busuzimayako85-order",
-            storageBucket: "busuzimayako85-order.firebasestorage.app",
-            messagingSenderId: "921095725285",
-            appId: "1:921095725285:web:d65f6accf6ddb28765f40c"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // 送信処理の追加
-        window.handleFormSubmit = async function(e) {
-            e.preventDefault();
-            const orderData = {
-                totalPrice: document.getElementById('totalDisplay').innerText,
-                date: new Date().toISOString()
-                // 必要に応じてここにお名前や詳細のinputを追加して収集できます
-            };
-            try {
-                await addDoc(collection(db, "orders"), orderData);
-                alert("オーダーを送信しました！");
-            } catch (error) {
-                console.error("Error:", error);
-                alert("送信に失敗しました。");
-            }
-        };
-    </script>
     <style>
-        /* ここはあなたが提示した元のデザインをそのまま使用しています */
-        body { background-color: #0b0b0b; color: #f0f0f0; font-family: 'Impact', 'Arial Black', 'Hiragino Kaku Gothic ProN', sans-serif; margin: 0; padding: 0; display: flex; min-height: 100vh; }
-        .left-panel { width: 40%; position: fixed; top: 0; left: 0; height: 100vh; background: #000000; display: flex; flex-direction: column; justify-content: center; align-items: center; border-right: 4px solid #ff0055; box-sizing: border-box; padding: 4px; }
-        .logo-area { width: 80%; max-width: 350px; aspect-ratio: 1; background: #111; border: 2px dashed #7cfc00; display: flex; justify-content: center; align-items: center; color: #555; text-align: center; margin-bottom: 20px; box-shadow: 0 0 20px rgba(255, 0, 85, 0.2); }
-        .info-text { color: #7cfc00; font-size: 14px; letter-spacing: 2px; text-shadow: 0 0 5px rgba(124, 252, 0, 0.5); margin-bottom: 10px; }
-        .right-panel { width: 60%; margin-left: 40%; padding: 50px; box-sizing: border-box; }
-        .illustration-card { background: #111; border: 1px solid #222; padding: 30px; margin-bottom: 30px; border-radius: 6px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ff0055; padding-bottom: 10px; margin-bottom: 25px; }
-        .card-title { font-size: 20px; color: #ffffff; margin: 0; letter-spacing: 1px; }
-        .remove-card-btn { background: none; border: 1px solid #ff0055; color: #ff0055; cursor: pointer; padding: 5px 10px; font-size: 12px; font-weight: bold; }
+        /* 全体のベース設定（パンク・ダークモード） */
+        body {
+            background-color: #0b0b0b;
+            color: #f0f0f0;
+            font-family: 'Impact', 'Arial Black', 'Hiragino Kaku Gothic ProN', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ─── 画面左側：固定看板エリア ─── */
+        .left-panel {
+            width: 40%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            background: #000000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-right: 4px solid #ff0055;
+            box-sizing: border-box;
+            padding: 4px;
+        }
+
+        .logo-area {
+            width: 80%;
+            max-width: 350px;
+            aspect-ratio: 1;
+            background: #111;
+            border: 2px dashed #7cfc00;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #555;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.2);
+        }
+
+        .info-text {
+            color: #7cfc00;
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px rgba(124, 252, 0, 0.5);
+            margin-bottom: 10px;
+        }
+
+        /* ─── 画面右側：メインコンテンツ ─── */
+        .right-panel {
+            width: 60%;
+            margin-left: 40%;
+            padding: 50px;
+            box-sizing: border-box;
+        }
+
+        /* イラストごとのカード枠 */
+        .illustration-card {
+            background: #111;
+            border: 1px solid #222;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 6px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #ff0055;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            color: #ffffff;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .remove-card-btn {
+            background: none;
+            border: 1px solid #ff0055;
+            color: #ff0055;
+            cursor: pointer;
+            padding: 5px 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
         .remove-card-btn:hover { background: #ff0055; color: #fff; }
-        .section-title { font-size: 16px; color: #7cfc00; margin-top: 25px; margin-bottom: 12px; letter-spacing: 1px; text-transform: uppercase; }
+
+        .section-title {
+            font-size: 16px;
+            color: #7cfc00;
+            margin-top: 25px;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* 未選択時のロック用カバー */
         .options-wrapper { position: relative; }
         .options-wrapper.locked { opacity: 0.2; pointer-events: none; user-select: none; }
+
+        /* スケジュール案内・アラート */
         .schedule-box { background: #151515; border: 1px solid #333; padding: 20px; border-radius: 4px; margin-bottom: 30px; }
         .stop-alert-box { display: none; background: #2a0000; border: 2px solid #ff0000; color: #ff3333; padding: 15px; border-radius: 4px; margin-bottom: 30px; font-weight: bold; text-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
+
+        /* 選択項目のスタイル */
         .form-group { margin-bottom: 10px; }
         label { display: flex; align-items: center; cursor: pointer; padding: 12px 15px; background: #161616; border-radius: 4px; border: 1px solid #222; font-size: 14px; }
         label:hover { background: #222; border-color: #ff0055; }
         input[type="radio"]:checked + span, input[type="checkbox"]:checked + span { color: #7cfc00; text-shadow: 0 0 8px rgba(124, 252, 0, 0.6); }
         .price-text { margin-left: auto; color: #888; font-weight: bold; }
+
+        /* 数量コントロール */
         .qty-container { display: flex; align-items: center; margin-top: 8px; padding-left: 30px; }
         .qty-btn { background: #222; color: #fff; border: 1px solid #444; width: 28px; height: 28px; cursor: pointer; font-weight: bold; }
         .qty-btn:hover { background: #ff0055; border-color: #ff0055; }
         .qty-input { width: 40px; text-align: center; background: #000; color: #7cfc00; border: 1px solid #333; height: 26px; font-size: 14px; }
-        .add-card-btn { width: 100%; background: #000; color: #7cfc00; border: 2px dashed #7cfc00; padding: 15px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; letter-spacing: 1px; transition: all 0.2s; }
+
+        /* ボタンデザイン */
+        .add-card-btn {
+            width: 100%;
+            background: #000;
+            color: #7cfc00;
+            border: 2px dashed #7cfc00;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
         .add-card-btn:hover { background: #7cfc00; color: #000; box-shadow: 0 0 15px rgba(124, 252, 0, 0.4); }
         .add-card-btn:disabled { opacity: 0.3; cursor: not-allowed; background: none !important; color: #444 !important; border-color: #444 !important; box-shadow: none !important; }
-        .total-box { margin-top: 40px; padding: 30px; background: #1a0007; border: 2px solid #ff0055; border-radius: 4px; text-align: center; box-shadow: 0 0 20px rgba(255, 0, 85, 0.3); }
+
+        /* 金額表示ボックス（割引表示付きにパワーアップ） */
+        .total-box {
+            margin-top: 40px;
+            padding: 30px;
+            background: #1a0007;
+            border: 2px solid #ff0055;
+            border-radius: 4px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
+        }
         .subtotal-text { font-size: 14px; color: #888; margin-bottom: 5px; }
         .discount-text { font-size: 15px; color: #7cfc00; font-weight: bold; margin-bottom: 15px; text-shadow: 0 0 5px rgba(124, 252, 0, 0.5); }
         .total-price { font-size: 42px; font-weight: bold; color: #ff0055; text-shadow: 0 0 15px rgba(255, 0, 85, 0.8); }
+        
         .submit-btn { width: 100%; background: #ff0055; color: white; border: none; padding: 20px; font-size: 20px; font-weight: bold; letter-spacing: 2px; cursor: pointer; margin-top: 25px; box-shadow: 0 4px 0 #b3003b; }
         .submit-btn:hover { background: #ff266f; box-shadow: 0 0 15px rgba(255, 0, 85, 0.6); }
         .submit-btn:disabled { background: #222 !important; color: #555 !important; box-shadow: none !important; cursor: not-allowed !important; }
-        @media (max-width: 900px) { body { flex-direction: column; } .left-panel { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 4px solid #ff0055; padding: 40px 20px; } .right-panel { width: 100%; margin-left: 0; padding: 20px; } }
+
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            .left-panel { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 4px solid #ff0055; padding: 40px 20px; }
+            .right-panel { width: 100%; margin-left: 0; padding: 20px; }
+        }
     </style>
 </head>
 <body>
+
+    <!-- 左側：ブランド看板エリア -->
     <div class="left-panel">
-        <div class="logo-area"><p>[ ロゴ ]</p></div>
+        <div class="logo-area">
+            <p style="padding: 20px; font-size: 14px;">[ ここにロゴ画像 <br>image_64c9bf.jpg が<br>大きく表示されます ]</p>
+        </div>
         <div class="info-text">busuzimayako85</div>
+        <div style="font-size: 12px; color: #666;">ILLUSTRATION ONLINE ORDER SYSTEM</div>
     </div>
+
+    <!-- 右側：メイン操作エリア -->
     <div class="right-panel">
-        <h1>ORDER & ESTIMATION</h1>
-        <form id="orderForm" onsubmit="handleFormSubmit(event)">
+        <h1 style="margin-top: 0; font-size: 32px; letter-spacing: 2px;">ORDER & ESTIMATION</h1>
+        
+        <div class="schedule-box" id="normalScheduleBox">
+            <span style="color: #ff0055; font-weight: bold;">【NOTICE】</span> 
+            <span id="currentSchedule">現在【7月以降】受付中（残り2枠）</span>
+        </div>
+
+        <div class="stop-alert-box" id="stopAlertBox">
+            ⚠️ 【只今、新規のご依頼を停止しております】<br>
+            現在、お見積もりのシミュレーションのみご利用いただけます。再開まで今しばらくお待ちください。
+        </div>
+
+        <form id="orderForm">
             <div id="illustrationContainer"></div>
-            <button type="button" id="addCardBtn" class="add-card-btn" onclick="addNewCard()">+ ADD ANOTHER ILLUSTRATION</button>
+
+            <button type="button" id="addCardBtn" class="add-card-btn" onclick="addNewCard()">+ ADD ANOTHER ILLUSTRATION (枚数を追加する)</button>
+
+            <!-- パワーアップした合計金額ボックス -->
             <div class="total-box">
-                <div class="subtotal-text" id="subtotalWrapper" style="display:none;">SUBTOTAL: <span id="subtotalDisplay">0 円</span></div>
-                <div class="discount-text" id="discountWrapper" style="display:none;">DISCOUNT: -<span id="discountDisplay">0 円</span></div>
+                <div class="subtotal-text" id="subtotalWrapper" style="display:none;">SUBTOTAL (小計): <span id="subtotalDisplay">0 円</span></div>
+                <div class="discount-text" id="discountWrapper" style="display:none;">MULTIPLE DISCOUNT (<span id="discountPercent">0</span>% OFF): -<span id="discountDisplay">0 円</span></div>
+                <div style="font-size: 13px; letter-spacing: 1px; color: #aaa;">ESTIMATED TOTAL (最終合計金額)</div>
                 <div class="total-price" id="totalDisplay">0 円</div>
             </div>
+
             <button type="submit" id="submitBtn" class="submit-btn" disabled>PROCEED TO HEARING</button>
         </form>
     </div>
-    <script>
+
+<script>
     const PRICES = {
         base: { face: 9000, bust: 11000, full: 12000 },
         bg: { none: 0, simple: 2000, custom: 3000, random: 6000 },
