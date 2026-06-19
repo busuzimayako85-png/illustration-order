@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>busuzimayako85 OFFICIAL ORDER SITE</title>
+    <style>
+        /* 全体のベース設定（パンク・ダークモード） */
+        body {
+            background-color: #0b0b0b;
+            color: #f0f0f0;
+            font-family: 'Impact', 'Arial Black', 'Hiragino Kaku Gothic ProN', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ─── 画面左側：Webサイトらしい固定看板・ギャラリーエリア ─── */
+        .left-panel {
+            width: 40%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            background: #000000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-right: 4px solid #ff0055; /* ロゴに合わせた鮮烈な赤の境界線 */
+            box-sizing: border-box;
+            padding: 4px;
+        }
+
+        .logo-area {
+            width: 80%;
+            max-width: 350px;
+            aspect-ratio: 1;
+            background: #111;
+            border: 2px dashed #7cfc00; /* ネオン黄緑の枠線（仮） */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #555;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.2);
+        }
+
+        .info-text {
+            color: #7cfc00; /* ロゴの黄緑 */
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px rgba(124, 252, 0, 0.5);
+            margin-bottom: 10px;
+        }
+
+        /* ─── 画面右側：スクロールするメインコンテンツ（見積もり） ─── */
+        .right-panel {
+            width: 60%;
+            margin-left: 40%; /* 左パネルの分だけ空ける */
+            padding: 50px;
+            box-sizing: border-box;
+        }
+
+        .section-title {
+            font-size: 24px;
+            color: #ffffff;
+            border-left: 6px solid #7cfc00; /* 黄緑のアクセント */
+            padding-left: 12px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        /* スケジュール案内板 */
+        .schedule-box {
+            background: #151515;
+            border: 1px solid #333;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+        }
+
+        /* 選択項目のカスタムスタイル */
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 15px;
+            background: #161616;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            border: 1px solid #222;
+        }
+
+        label:hover {
+            background: #222;
+            border-color: #ff0055;
+        }
+
+        /* ラジオボタン・チェックボックスが選ばれた時の赤×黄緑の発光 */
+        input[type="radio"]:checked + span,
+        input[type="checkbox"]:checked + span {
+            color: #7cfc00; /* 選ばれたら黄緑に */
+            text-shadow: 0 0 8px rgba(124, 252, 0, 0.6);
+        }
+
+        input[type="radio"]:checked ~ .price-text,
+        input[type="checkbox"]:checked ~ .price-text {
+            color: #ffffff;
+        }
+
+        .price-text {
+            margin-left: auto;
+            color: #888;
+            font-weight: bold;
+        }
+
+        /* 数量コントロール */
+        .qty-container {
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+            padding-left: 30px;
+        }
+
+        .qty-btn {
+            background: #222;
+            color: #fff;
+            border: 1px solid #444;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .qty-btn:hover { background: #ff0055; border-color: #ff0055; }
+        
+        .qty-input {
+            width: 45px;
+            text-align: center;
+            background: #000;
+            color: #7cfc00;
+            border: 1px solid #333;
+            height: 30px;
+            font-size: 16px;
+        }
+
+        /* 見積もり合計（赤のネオン） */
+        .total-box {
+            margin-top: 40px;
+            padding: 30px;
+            background: #1a0007;
+            border: 2px solid #ff0055;
+            border-radius: 4px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
+        }
+
+        .total-price {
+            font-size: 42px;
+            font-weight: bold;
+            color: #ff0055;
+            text-shadow: 0 0 15px rgba(255, 0, 85, 0.8);
+            margin-top: 10px;
+        }
+
+        /* 送信ボタン */
+        .submit-btn {
+            width: 100%;
+            background: #ff0055;
+            color: white;
+            border: none;
+            padding: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            cursor: pointer;
+            margin-top: 25px;
+            box-shadow: 0 4px 0 #b3003b;
+        }
+
+        .submit-btn:hover {
+            background: #ff266f;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.6);
+        }
+
+        .submit-btn:disabled {
+            background: #222;
+            color: #555;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* スマホで見たら縦並びにするための設定（レスポンシブ） */
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            .left-panel { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 4px solid #ff0055; padding: 40px 20px; }
+            .right-panel { width: 100%; margin-left: 0; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 左側：ブランド看板エリア -->
+    <div class="left-panel">
+        <div class="logo-area">
+            <!-- 実際に公開した後はここにimage_64c9bf.jpgを入れます -->
+            <p style="padding: 20px; font-size: 14px;">[ ここにロゴ画像 <br>image_64c9bf.jpg が<br>大きく表示されます ]</p>
+        </div>
+        <div class="info-text">busuzimayako85</div>
+        <div style="font-size: 12px; color: #666;">ILLUSTRATION ONLINE ORDER SYSTEM</div>
+    </div>
+
+    <!-- 右側：メイン操作エリア -->
+    <div class="right-panel">
+        <h1 style="margin-top: 0; font-size: 32px; letter-spacing: 2px;">ORDER & ESTIMATION</h1>
+        
+        <div class="schedule-box">
+            <span style="color: #ff0055; font-weight: bold;">【NOTICE】</span> 
+            <span id="currentSchedule">現在【7月以降】受付中（残り2枠）</span>
+        </div>
+
+        <form id="orderForm">
+            <!-- STEP 1 -->
+            <div class="section-title">01. SELECT BASE TYPE (必須)</div>
+            <div class="form-group">
+                <label><input type="radio" name="base" value="face" onchange="calculate()"> <span>フェイスアップ</span> <span class="price-text">9,000円</span></label>
+            </div>
+            <div class="form-group">
+                <label><input type="radio" name="base" value="bust" onchange="calculate()"> <span>バストアップ</span> <span class="price-text">11,000円</span></label>
+            </div>
+            <div class="form-group">
+                <label><input type="radio" name="base" value="full" onchange="calculate()"> <span>全身</span> <span class="price-text">12,000円</span></label>
+            </div>
+
+            <!-- STEP 2 -->
+            <div class="section-title">02. BACKGROUND OPTIONS (任意)</div>
+            <div class="form-group">
+                <label><input type="radio" name="bg" value="none" checked onchange="calculate()"> <span>背景なし (単色/透過/グラデ)</span> <span class="price-text">+0円</span></label>
+            </div>
+            <div class="form-group">
+                <label><input type="radio" name="bg" value="simple" onchange="calculate()"> <span>簡易背景 (パターン/エフェクト)</span> <span class="price-text">+2,000円</span></label>
+            </div>
+            <div class="form-group">
+                <label><input type="radio" name="bg" value="custom" onchange="calculate()"> <span>しっかり背景: 構図指定あり</span> <span class="price-text">+3,000円</span></label>
+            </div>
+            <div class="form-group">
+                <label><input type="radio" name="bg" value="random" onchange="calculate()"> <span>しっかり背景: おまかせ (構図考案料込)</span> <span class="price-text">+6,000円</span></label>
+            </div>
+
+            <!-- STEP 3 -->
+            <div class="section-title">03. ADDITIONAL OPTIONS (任意)</div>
+            <div class="form-group">
+                <label><input type="checkbox" id="faceDiffCheck" onchange="toggleQty('faceDiff')"> <span>表情差分</span> <span class="price-text">+500円 / 枚</span></label>
+                <div class="qty-container" id="faceDiffQtyContainer">
+                    <button type="button" class="qty-btn" onclick="changeQty('faceDiff', -1)">-</button>
+                    <input type="text" id="faceDiffQty" class="qty-input" value="0" readonly>
+                    <button type="button" class="qty-btn" onclick="changeQty('faceDiff', 1)">+</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="poseDiffCheck" onchange="toggleQty('poseDiff')"> <span>ポーズ差分</span> <span class="price-text">+700円 / 枚</span></label>
+                <div class="qty-container" id="poseDiffQtyContainer">
+                    <button type="button" class="qty-btn" onclick="changeQty('poseDiff', -1)">-</button>
+                    <input type="text" id="poseDiffQty" class="qty-input" value="0" readonly>
+                    <button type="button" class="qty-btn" onclick="changeQty('poseDiff', 1)">+</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="clothDiffCheck" onchange="toggleQty('clothDiff')"> <span>服装差分</span> <span class="price-text">+1,000円 / 枚</span></label>
+                <div class="qty-container" id="clothDiffQtyContainer">
+                    <button type="button" class="qty-btn" onclick="changeQty('clothDiff', -1)">-</button>
+                    <input type="text" id="clothDiffQty" class="qty-input" value="0" readonly>
+                    <button type="button" class="qty-btn" onclick="changeQty('clothDiff', 1)">+</button>
+                </div>
+            </div>
+
+            <!-- 合計金額 -->
+            <div class="total-box">
+                <div style="font-size: 14px; letter-spacing: 1px; color: #aaa;">ESTIMATED TOTAL</div>
+                <div class="total-price" id="totalDisplay">0 円</div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="submit-btn" disabled>PROCEED TO HEARING</button>
+        </form>
+    </div>
+
+<script>
+    const PRICES = {
+        base: { face: 9000, bust: 11000, full: 12000 },
+        bg: { none: 0, simple: 2000, custom: 3000, random: 6000 },
+        diff: { faceDiff: 500, poseDiff: 700, clothDiff: 1000 }
+    };
+
+    function changeQty(type, val) {
+        const checkbox = document.getElementById(type + 'Check');
+        if (!checkbox.checked) return;
+        const input = document.getElementById(type + 'Qty');
+        let current = parseInt(input.value) + val;
+        if (current < 0) current = 0;
+        input.value = current;
+        calculate();
+    }
+
+    function toggleQty(type) {
+        const checkbox = document.getElementById(type + 'Check');
+        const input = document.getElementById(type + 'Qty');
+        if (!checkbox.checked) { input.value = 0; } 
+        else if (input.value == 0) { input.value = 1; }
+        calculate();
+    }
+
+    function calculate() {
+        const form = document.getElementById('orderForm');
+        const baseRadio = form.elements['base'].value;
+        const bgRadio = form.elements['bg'].value;
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (!baseRadio) {
+            document.getElementById('totalDisplay').innerText = "0 円";
+            submitBtn.disabled = true;
+            return;
+        }
+
+        let total = PRICES.base[baseRadio];
+        total += PRICES.bg[bgRadio];
+
+        ['faceDiff', 'poseDiff', 'clothDiff'].forEach(type => {
+            const checkbox = document.getElementById(type + 'Check');
+            const qty = parseInt(document.getElementById(type + 'Qty').value);
+            if (checkbox.checked) { total += PRICES.diff[type] * qty; }
+        });
+
+        document.getElementById('totalDisplay').innerText = total.toLocaleString() + " 円";
+        submitBtn.disabled = false;
+    }
+</script>
+</body>
+</html>

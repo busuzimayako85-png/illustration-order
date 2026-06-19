@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>【管理デスク】busuzimayako85 OFFICIAL SITE</title>
+    <style>
+        /* 全体のベース設定（表画面と統一） */
+        body {
+            background-color: #0b0b0b;
+            color: #f0f0f0;
+            font-family: 'Impact', 'Arial Black', 'Hiragino Kaku Gothic ProN', sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .admin-container {
+            width: 100%;
+            max-width: 900px;
+            background: #000000;
+            border: 2px solid #ff0055; /* 鮮烈な赤の枠線 */
+            box-shadow: 0 0 30px rgba(255, 0, 85, 0.15);
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 32px;
+            color: #ffffff;
+            letter-spacing: 2px;
+            margin-top: 0;
+            margin-bottom: 10px;
+            border-bottom: 3px double #ff0055;
+            padding-bottom: 15px;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 20px;
+            color: #ffffff;
+            border-left: 6px solid #7cfc00; /* ネオン黄緑のアクセント */
+            padding-left: 12px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .section {
+            background: #111111;
+            border: 1px solid #222;
+            padding: 25px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+        }
+
+        /* スケジュール管理のスタイル */
+        .tmpl-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .tmpl-btn {
+            background: #161616;
+            color: #888;
+            border: 1px solid #333;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .tmpl-btn:hover {
+            background: #222;
+            border-color: #7cfc00;
+            color: #7cfc00;
+            text-shadow: 0 0 5px rgba(124, 252, 0, 0.5);
+        }
+
+        .input-text {
+            width: 100%;
+            padding: 15px;
+            background: #000000;
+            color: #7cfc00;
+            border: 1px solid #333;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+            margin-top: 5px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .input-text:focus {
+            outline: none;
+            border-color: #ff0055;
+            box-shadow: 0 0 10px rgba(255, 0, 85, 0.3);
+        }
+
+        .save-btn {
+            width: 100%;
+            background: #ff0055;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #b3003b;
+        }
+
+        .save-btn:hover {
+            background: #ff266f;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.5);
+        }
+
+        /* 依頼一覧のスタイル */
+        .order-card {
+            background: #080808;
+            border: 1px solid #222;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 6px 12px;
+            border-radius: 2px;
+            font-weight: bold;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .status-hearing { background: #7cfc00; color: #000; box-shadow: 0 0 10px rgba(124, 252, 0, 0.4); }
+        .status-wait { background: #ffea00; color: #000; }
+        .status-complete { background: #ff0055; color: #fff; box-shadow: 0 0 10px rgba(255, 0, 85, 0.4); }
+
+        .order-title {
+            font-size: 18px;
+            color: #fff;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .detail-list {
+            background: #111;
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #aaa;
+            line-height: 1.8;
+            border-left: 3px solid #ff0055;
+        }
+
+        .action-area {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        select {
+            background: #161616;
+            color: #fff;
+            padding: 12px 20px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        select:focus {
+            border-color: #ff0055;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="admin-container">
+    <h1>busuzimayako85 CONTROL DESK</h1>
+
+    <!-- スケジュール管理 -->
+    <div class="section">
+        <h2>01. UPDATE SYSTEM NOTICE (受付状況の更新)</h2>
+        <div style="margin-bottom: 15px;">
+            <small style="color: #666; font-size: 12px;">テンプレートを選択して文字を書き換えてください：</small>
+        </div>
+        <div class="tmpl-container">
+            <button class="tmpl-btn" onclick="useTemplate('現在【○月以降】受付中（残り●枠）')">TEMPLATE A (受付中)</button>
+            <button class="tmpl-btn" onclick="useTemplate('依頼停止中（○月再開予定）')">TEMPLATE B (再開予定)</button>
+            <button class="tmpl-btn" onclick="useTemplate('依頼停止中（再開未定）')">TEMPLATE C (未定)</button>
+        </div>
+        <input type="text" id="scheduleInput" class="input-text" value="現在【7月以降】受付中（残り2枠）">
+        <button class="save-btn" onclick="updateSchedule()">LAUNCH TO LIVE SITE (表画面に反映)</button>
+    </div>
+
+    <!-- 依頼一覧・進行ステータス管理 -->
+    <div class="section">
+        <h2>02. ACTIVE ORDERS (進行中のオーダー一覧)</h2>
+        
+        <div class="order-card">
+            <span class="status-badge status-hearing" id="statusLabel1">HEARING</span>
+            <span class="order-title">ORDER: #0024 <span style="color: #666; font-size: 14px;">(Client: Guest_A)</span></span>
+            
+            <div class="detail-list">
+                ・BASE: バストアップ (11,000円) <br>
+                ・BACKGROUND: 簡易背景 (+2,000円) <br>
+                ・OPTION: 表情差分 × 1 (+500円) <br>
+                <strong style="color: #7cfc00;">💰 TOTAL ESTIMATE: 13,500円</strong>
+            </div>
+            
+            <div class="action-area">
+                <span style="font-size: 14px; color: #888;">STATUS:</span>
+                <select id="statusSelect1" onchange="changeStatus(1)">
+                    <option value="hearing" selected>ヒアリング中</option>
+                    <option value="wait">入金待ち (請求を出す)</option>
+                    <option value="complete">納品完了</option>
+                </select>
+                <input type="text" id="gigaUrl1" class="input-text" style="margin:0; width: 280px; display:none;" placeholder="GigaFile便のURLを入力">
+                <button class="save-btn" id="sendBtn1" style="margin:0; width: auto; padding: 12px 25px; display:none;" onclick="sendGigaUrl(1)">SEND & CLOSE</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function useTemplate(text) {
+        document.getElementById('scheduleInput').value = text;
+    }
+
+    function updateSchedule() {
+        const val = document.getElementById('scheduleInput').value;
+        alert("表画面のスケジュールを「" + val + "」に更新しました！");
+    }
+
+    function changeStatus(id) {
+        const select = document.getElementById('statusSelect' + id).value;
+        const label = document.getElementById('statusLabel' + id);
+        const urlInput = document.getElementById('gigaUrl' + id);
+        const sendBtn = document.getElementById('sendBtn' + id);
+
+        if (select === 'hearing') {
+            label.className = "status-badge status-hearing";
+            label.innerText = "HEARING";
+            urlInput.style.display = "none";
+            sendBtn.style.display = "none";
+        } else if (select === 'wait') {
+            label.className = "status-badge status-wait";
+            label.innerText = "WAITING PAYMENT";
+            urlInput.style.display = "none";
+            sendBtn.style.display = "none";
+            alert("クライアント画面に振込案内と『入金待ち』ステータスを表示しました。");
+        } else if (select === 'complete') {
+            urlInput.style.display = "inline-block";
+            sendBtn.style.display = "inline-block";
+        }
+    }
+
+    function sendGigaUrl(id) {
+        const url = document.getElementById('gigaUrl' + id).value;
+        if(!url) { alert("ギガファイル便のURLを入力してください"); return; }
+        
+        const label = document.getElementById('statusLabel' + id);
+        label.className = "status-badge status-complete";
+        label.innerText = "COMPLETED";
+        
+        alert("ギガファイル便のURL（" + url + "）をチャットへ送信し、ステータスを【納品完了】にしました！");
+    }
+</script>
+</body>
+</html>
