@@ -461,6 +461,16 @@
             }
         }
     }
+
+    // Firebase（module）の仕様で関数が外から見えなくなるのを防ぐため、
+    // ボタンの onclick 等から呼び出せるようにグローバルに公開します。
+    window.addNewCard = addNewCard;
+    window.removeCard = removeCard;
+    window.onBaseSelect = onBaseSelect;
+    window.changeQty = changeQty;
+    window.toggleQty = toggleQty;
+    window.calculate = calculate;
+    
 </script>
 </body>
 </html>
