@@ -227,13 +227,52 @@
     const urlParams = new URLSearchParams(window.location.search);
     const isStopMode = (urlParams.get('mode') === 'stop');
 
-    window.onload = function() {
+    // window.onload の中身を、Firebaseからステータスを取得する処理に書き換えます
+    window.onload = async function() {
+        // URLのクエリパラメータによる停止モード判定（既存機能の維持）
+        const urlParams = new URLSearchParams(window.location.search);
+        let isStopMode = (urlParams.get('mode') === 'stop');
+
+        try {
+            // Firebaseからインポートされた getFirestore 等がすでに上のモジュールスクリプト側で初期化されている前提ですが、
+            // もし db が定義されていない場合は、既存の firebaseConfig を使ってここで初期化します
+            if (typeof db === 'undefined' && typeof firebaseApp !== 'undefined') {
+                window.db = firebase.firestore();
+            }
+            
+            // settings コレクションの schedule ドキュメントを読み込みます
+            const docRef = doc(db, "settings", "schedule");
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                // スケジュール文言の書き換え
+                if (data.text) {
+                    document.getElementById('currentSchedule').innerText = data.text;
+                }
+                // サイトモード（通常 or 停止）の決定（管理画面の設定を優先）
+                if (data.mode) {
+                    isStopMode = (data.mode === 'stop');
+                }
+            }
+        } catch (error) {
+            console.error("Firebaseからの読み込みに失敗しました。元の初期設定で動作します:", error);
+        }
+
+        // モードに応じた画面表示の切り替え（あなたの元のロジックをそのまま適用）
+        window.currentSiteModeIsStop = isStopMode; // calculate()で使うためグローバルに保持
+
         if (isStopMode) {
             document.getElementById('normalScheduleBox').style.display = 'none';
             document.getElementById('stopAlertBox').style.display = 'block';
+        } else {
+            document.getElementById('normalScheduleBox').style.display = 'block';
+            document.getElementById('stopAlertBox').style.display = 'none';
         }
+
+        // 最初の1枚目のカードを生成
         addNewCard();
-    }
+    };
 
     function addNewCard() {
         cardCount++;
