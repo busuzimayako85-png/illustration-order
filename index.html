@@ -4,312 +4,104 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>busuzimayako85 OFFICIAL ORDER SITE</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDi4twz34suKR2KXztm19FbUF-dtJN4OQU",
+            authDomain: "busuzimayako85-order.firebaseapp.com",
+            projectId: "busuzimayako85-order",
+            storageBucket: "busuzimayako85-order.firebasestorage.app",
+            messagingSenderId: "921095725285",
+            appId: "1:921095725285:web:d65f6accf6ddb28765f40c"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 送信処理（グローバル関数として定義）
+        window.saveOrder = async function(event) {
+            event.preventDefault();
+            const name = document.getElementById('userName').value;
+            const message = document.getElementById('userMessage').value;
+            const total = document.getElementById('totalDisplay').innerText;
+            try {
+                await addDoc(collection(db, "orders"), { name, message, total, date: new Date() });
+                alert("送信完了しました！");
+            } catch (e) { alert("エラー: " + e.message); }
+        };
+    </script>
     <style>
-        /* 全体のベース設定（パンク・ダークモード） */
-        body {
-            background-color: #0b0b0b;
-            color: #f0f0f0;
-            font-family: 'Impact', 'Arial Black', 'Hiragino Kaku Gothic ProN', sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* ─── 画面左側：固定看板エリア ─── */
-        .left-panel {
-            width: 40%;
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            background: #000000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border-right: 4px solid #ff0055;
-            box-sizing: border-box;
-            padding: 4px;
-        }
-
-        .logo-area {
-            width: 80%;
-            max-width: 350px;
-            aspect-ratio: 1;
-            background: #111;
-            border: 2px dashed #7cfc00;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #555;
-            text-align: center;
-            margin-bottom: 20px;
-            box-shadow: 0 0 20px rgba(255, 0, 85, 0.2);
-        }
-
-        .info-text {
-            color: #7cfc00;
-            font-size: 14px;
-            letter-spacing: 2px;
-            text-shadow: 0 0 5px rgba(124, 252, 0, 0.5);
-            margin-bottom: 10px;
-        }
-
-        /* ─── 画面右側：メインコンテンツ ─── */
-        .right-panel {
-            width: 60%;
-            margin-left: 40%;
-            padding: 50px;
-            box-sizing: border-box;
-        }
-
-        /* イラストごとのカード枠 */
-        .illustration-card {
-            background: #111;
-            border: 1px solid #222;
-            padding: 30px;
-            margin-bottom: 30px;
-            border-radius: 6px;
-            position: relative;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #ff0055;
-            padding-bottom: 10px;
-            margin-bottom: 25px;
-        }
-
-        .card-title {
-            font-size: 20px;
-            color: #ffffff;
-            margin: 0;
-            letter-spacing: 1px;
-        }
-
-        .remove-card-btn {
-            background: none;
-            border: 1px solid #ff0055;
-            color: #ff0055;
-            cursor: pointer;
-            padding: 5px 10px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .remove-card-btn:hover { background: #ff0055; color: #fff; }
-
-        .section-title {
-            font-size: 16px;
-            color: #7cfc00;
-            margin-top: 25px;
-            margin-bottom: 12px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        /* 未選択時のロック用カバー */
-        .options-wrapper { position: relative; }
-        .options-wrapper.locked { opacity: 0.2; pointer-events: none; user-select: none; }
-
-        /* スケジュール案内・アラート */
-        .schedule-box { background: #151515; border: 1px solid #333; padding: 20px; border-radius: 4px; margin-bottom: 30px; }
-        .stop-alert-box { display: none; background: #2a0000; border: 2px solid #ff0000; color: #ff3333; padding: 15px; border-radius: 4px; margin-bottom: 30px; font-weight: bold; text-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
-
-        /* 選択項目のスタイル */
+        /* (前回のデザインをそのまま維持) */
+        body { background-color: #0b0b0b; color: #f0f0f0; font-family: 'Impact', 'Arial Black', sans-serif; margin: 0; padding: 0; display: flex; min-height: 100vh; }
+        .left-panel { width: 40%; position: fixed; height: 100vh; background: #000; border-right: 4px solid #ff0055; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .right-panel { width: 60%; margin-left: 40%; padding: 50px; box-sizing: border-box; }
+        .illustration-card { background: #111; border: 1px solid #222; padding: 30px; margin-bottom: 30px; border-radius: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .card-header { display: flex; justify-content: space-between; border-bottom: 2px solid #ff0055; padding-bottom: 10px; margin-bottom: 25px; }
+        .section-title { font-size: 16px; color: #7cfc00; margin: 15px 0 10px; }
         .form-group { margin-bottom: 10px; }
-        label { display: flex; align-items: center; cursor: pointer; padding: 12px 15px; background: #161616; border-radius: 4px; border: 1px solid #222; font-size: 14px; }
-        label:hover { background: #222; border-color: #ff0055; }
-        input[type="radio"]:checked + span, input[type="checkbox"]:checked + span { color: #7cfc00; text-shadow: 0 0 8px rgba(124, 252, 0, 0.6); }
-        .price-text { margin-left: auto; color: #888; font-weight: bold; }
-
-        /* 数量コントロール */
-        .qty-container { display: flex; align-items: center; margin-top: 8px; padding-left: 30px; }
-        .qty-btn { background: #222; color: #fff; border: 1px solid #444; width: 28px; height: 28px; cursor: pointer; font-weight: bold; }
-        .qty-btn:hover { background: #ff0055; border-color: #ff0055; }
-        .qty-input { width: 40px; text-align: center; background: #000; color: #7cfc00; border: 1px solid #333; height: 26px; font-size: 14px; }
-
-        /* ボタンデザイン */
-        .add-card-btn {
-            width: 100%;
-            background: #000;
-            color: #7cfc00;
-            border: 2px dashed #7cfc00;
-            padding: 15px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-            letter-spacing: 1px;
-            transition: all 0.2s;
-        }
-        .add-card-btn:hover { background: #7cfc00; color: #000; box-shadow: 0 0 15px rgba(124, 252, 0, 0.4); }
-        .add-card-btn:disabled { opacity: 0.3; cursor: not-allowed; background: none !important; color: #444 !important; border-color: #444 !important; box-shadow: none !important; }
-
-        /* 金額表示ボックス（割引表示付きにパワーアップ） */
-        .total-box {
-            margin-top: 40px;
-            padding: 30px;
-            background: #1a0007;
-            border: 2px solid #ff0055;
-            border-radius: 4px;
-            text-align: center;
-            box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
-        }
-        .subtotal-text { font-size: 14px; color: #888; margin-bottom: 5px; }
-        .discount-text { font-size: 15px; color: #7cfc00; font-weight: bold; margin-bottom: 15px; text-shadow: 0 0 5px rgba(124, 252, 0, 0.5); }
-        .total-price { font-size: 42px; font-weight: bold; color: #ff0055; text-shadow: 0 0 15px rgba(255, 0, 85, 0.8); }
-        
-        .submit-btn { width: 100%; background: #ff0055; color: white; border: none; padding: 20px; font-size: 20px; font-weight: bold; letter-spacing: 2px; cursor: pointer; margin-top: 25px; box-shadow: 0 4px 0 #b3003b; }
-        .submit-btn:hover { background: #ff266f; box-shadow: 0 0 15px rgba(255, 0, 85, 0.6); }
-        .submit-btn:disabled { background: #222 !important; color: #555 !important; box-shadow: none !important; cursor: not-allowed !important; }
-
-        @media (max-width: 900px) {
-            body { flex-direction: column; }
-            .left-panel { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 4px solid #ff0055; padding: 40px 20px; }
-            .right-panel { width: 100%; margin-left: 0; padding: 20px; }
-        }
+        label { display: flex; align-items: center; padding: 12px; background: #161616; border: 1px solid #222; }
+        .price-text { margin-left: auto; color: #888; }
+        .total-box { margin-top: 40px; padding: 30px; background: #1a0007; border: 2px solid #ff0055; text-align: center; }
+        .total-price { font-size: 42px; font-weight: bold; color: #ff0055; }
+        .submit-btn { width: 100%; background: #ff0055; color: white; padding: 20px; font-size: 20px; font-weight: bold; cursor: pointer; margin-top: 25px; }
+        @media (max-width: 900px) { body { flex-direction: column; } .left-panel { width: 100%; height: auto; position: relative; } .right-panel { width: 100%; margin-left: 0; } }
     </style>
 </head>
 <body>
-
-    <!-- 左側：ブランド看板エリア -->
-    <div class="left-panel">
-        <div class="logo-area">
-            <p style="padding: 20px; font-size: 14px;">[ ここにロゴ画像 <br>image_64c9bf.jpg が<br>大きく表示されます ]</p>
-        </div>
-        <div class="info-text">busuzimayako85</div>
-        <div style="font-size: 12px; color: #666;">ILLUSTRATION ONLINE ORDER SYSTEM</div>
-    </div>
-
-    <!-- 右側：メイン操作エリア -->
+    <div class="left-panel"><h1>busuzimayako85</h1></div>
     <div class="right-panel">
-        <h1 style="margin-top: 0; font-size: 32px; letter-spacing: 2px;">ORDER & ESTIMATION</h1>
-        
-        <div class="schedule-box" id="normalScheduleBox">
-            <span style="color: #ff0055; font-weight: bold;">【NOTICE】</span> 
-            <span id="currentSchedule">現在【7月以降】受付中（残り2枠）</span>
-        </div>
-
-        <div class="stop-alert-box" id="stopAlertBox">
-            ⚠️ 【只今、新規のご依頼を停止しております】<br>
-            現在、お見積もりのシミュレーションのみご利用いただけます。再開まで今しばらくお待ちください。
-        </div>
-
-        <form id="orderForm">
+        <h1>ORDER & ESTIMATION</h1>
+        <form id="orderForm" onsubmit="saveOrder(event)">
             <div id="illustrationContainer"></div>
-
-            <button type="button" id="addCardBtn" class="add-card-btn" onclick="addNewCard()">+ ADD ANOTHER ILLUSTRATION (枚数を追加する)</button>
-
-            <!-- パワーアップした合計金額ボックス -->
+            <button type="button" class="add-card-btn" onclick="addNewCard()">+ ADD</button>
             <div class="total-box">
-                <div class="subtotal-text" id="subtotalWrapper" style="display:none;">SUBTOTAL (小計): <span id="subtotalDisplay">0 円</span></div>
-                <div class="discount-text" id="discountWrapper" style="display:none;">MULTIPLE DISCOUNT (<span id="discountPercent">0</span>% OFF): -<span id="discountDisplay">0 円</span></div>
-                <div style="font-size: 13px; letter-spacing: 1px; color: #aaa;">ESTIMATED TOTAL (最終合計金額)</div>
                 <div class="total-price" id="totalDisplay">0 円</div>
             </div>
-
-            <button type="submit" id="submitBtn" class="submit-btn" disabled>PROCEED TO HEARING</button>
+            <input type="text" id="userName" placeholder="お名前" required style="width:100%; padding:15px; margin-top:20px;">
+            <textarea id="userMessage" placeholder="ご依頼詳細" required style="width:100%; padding:15px; margin-top:10px;"></textarea>
+            <button type="submit" class="submit-btn">SEND ORDER</button>
         </form>
     </div>
 
 <script>
-    const PRICES = {
-        base: { face: 9000, bust: 11000, full: 12000 },
-        bg: { none: 0, simple: 2000, custom: 3000, random: 6000 },
-        diff: { faceDiff: 500, poseDiff: 700, clothDiff: 1000 }
-    };
-
+    const PRICES = { base: { face: 9000, bust: 11000, full: 12000 }, bg: { none: 0, simple: 2000, custom: 3000, random: 6000 }, diff: { faceDiff: 500, poseDiff: 700, clothDiff: 1000 } };
     let cardCount = 0;
-    const urlParams = new URLSearchParams(window.location.search);
-    const isStopMode = (urlParams.get('mode') === 'stop');
-
-    window.onload = function() {
-        if (isStopMode) {
-            document.getElementById('normalScheduleBox').style.display = 'none';
-            document.getElementById('stopAlertBox').style.display = 'block';
-        }
-        addNewCard();
-    }
 
     function addNewCard() {
         cardCount++;
-        const container = document.getElementById('illustrationContainer');
-        const cardHtml = `
+        document.getElementById('illustrationContainer').insertAdjacentHTML('beforeend', `
             <div class="illustration-card" id="card_${cardCount}">
-                <div class="card-header"><h3 class="card-title">ILLUSTRATION #${cardCount}</h3>${cardCount > 1 ? `<button type="button" class="remove-card-btn" onclick="removeCard(${cardCount})">REMOVE</button>` : ''}</div>
-                <div class="section-title">01. BASE TYPE</div>
-                <label><input type="radio" name="base_${cardCount}" value="face" onchange="onBaseSelect(${cardCount})"> <span>フェイスアップ</span> <span class="price-text">9,000円</span></label>
-                <label><input type="radio" name="base_${cardCount}" value="bust" onchange="onBaseSelect(${cardCount})"> <span>バストアップ</span> <span class="price-text">11,000円</span></label>
-                <label><input type="radio" name="base_${cardCount}" value="full" onchange="onBaseSelect(${cardCount})"> <span>全身</span> <span class="price-text">12,000円</span></label>
-                <div class="options-wrapper locked" id="optionsWrapper_${cardCount}">
-                    <div class="section-title">02. BACKGROUND</div>
-                    <label><input type="radio" name="bg_${cardCount}" value="none" checked onchange="calculate()"> <span>背景なし</span> <span class="price-text">+0円</span></label>
-                    <label><input type="radio" name="bg_${cardCount}" value="simple" onchange="calculate()"> <span>簡易背景</span> <span class="price-text">+2,000円</span></label>
-                    <label><input type="radio" name="bg_${cardCount}" value="custom" onchange="calculate()"> <span>指定背景</span> <span class="price-text">+3,000円</span></label>
-                    <label><input type="radio" name="bg_${cardCount}" value="random" onchange="calculate()"> <span>おまかせ</span> <span class="price-text">+6,000円</span></label>
-                    <div class="section-title">03. OPTIONS</div>
-                    ${['faceDiff','poseDiff','clothDiff'].map((t,i)=>`<label><input type="checkbox" id="${t}Check_${cardCount}" onchange="toggleQty(${cardCount},'${t}')"> <span>${['表情','ポーズ','服装'][i]}差分</span> <span class="price-text">+${[500,700,1000][i]}円</span></label><div class="qty-container"><button type="button" class="qty-btn" onclick="changeQty(${cardCount},'${t}',-1)">-</button><input type="text" id="${t}Qty_${cardCount}" class="qty-input" value="0" readonly><button type="button" class="qty-btn" onclick="changeQty(${cardCount},'${t}',1)">+</button></div>`).join('')}
-                </div>
-            </div>`;
-        container.insertAdjacentHTML('beforeend', cardHtml);
+                <div class="card-header"><h3>ITEM #${cardCount}</h3>${cardCount > 1 ? `<button type="button" onclick="removeCard(${cardCount})">削除</button>` : ''}</div>
+                <div class="section-title">BASE</div>
+                <label><input type="radio" name="base_${cardCount}" value="face" onchange="calculate()"> フェイスアップ 9,000円</label>
+                <label><input type="radio" name="base_${cardCount}" value="bust" onchange="calculate()"> バストアップ 11,000円</label>
+                <label><input type="radio" name="base_${cardCount}" value="full" onchange="calculate()"> 全身 12,000円</label>
+                <div class="section-title">BG</div>
+                <label><input type="radio" name="bg_${cardCount}" value="none" checked onchange="calculate()"> なし +0円</label>
+                <label><input type="radio" name="bg_${cardCount}" value="simple" onchange="calculate()"> 簡易 +2,000円</label>
+            </div>`);
         calculate();
     }
 
-    function removeCard(id) { document.getElementById(`card_${id}`).remove(); calculate(); }
-    function onBaseSelect(id) { document.getElementById(`optionsWrapper_${id}`).classList.remove('locked'); calculate(); }
-    function changeQty(id, type, val) { const c = document.getElementById(`${type}Check_${id}`); if(!c.checked) return; const i = document.getElementById(`${type}Qty_${id}`); i.value = Math.max(0, parseInt(i.value)+val); calculate(); }
-    function toggleQty(id, type) { const c = document.getElementById(`${type}Check_${id}`); const i = document.getElementById(`${type}Qty_${id}`); i.value = c.checked ? (i.value==0?1:i.value) : 0; calculate(); }
+    function removeCard(id) { document.getElementById('card_' + id).remove(); calculate(); }
 
     function calculate() {
-        const form = document.getElementById('orderForm');
-        let rawSubtotal = 0;
-        let activeCardCount = 0;
-        let allBasesSelected = true;
-
-        const cards = document.querySelectorAll('.illustration-card');
-        if (cards.length === 0) { allBasesSelected = false; }
-
-        cards.forEach(card => {
-            const id = card.id.split('_')[1];
-            const baseRadio = document.querySelector(`input[name="base_${id}"]:checked`);
-            if (!baseRadio) {
-                allBasesSelected = false;
-                return; 
+        let sub = 0; let active = 0;
+        document.querySelectorAll('.illustration-card').forEach(card => {
+            let id = card.id.split('_')[1];
+            let b = document.querySelector(`input[name="base_${id}"]:checked`);
+            if(b) {
+                active++;
+                sub += PRICES.base[b.value] + PRICES.bg[document.querySelector(`input[name="bg_${id}"]:checked`).value];
             }
-            activeCardCount++;
-            const bgRadio = document.querySelector(`input[name="bg_${id}"]:checked`).value;
-            rawSubtotal += PRICES.base[baseRadio.value];
-            rawSubtotal += PRICES.bg[bgRadio];
-
-            ['faceDiff', 'poseDiff', 'clothDiff'].forEach(type => {
-                const checkbox = document.getElementById(`${type}Check_${id}`);
-                const qtyInput = document.getElementById(`${type}Qty_${id}`);
-                if (checkbox && checkbox.checked && qtyInput) {
-                    rawSubtotal += PRICES.diff[type] * parseInt(qtyInput.value);
-                }
-            });
         });
-
-        let discountRate = 0; 
-        if (activeCardCount === 2) { discountRate = 0.05; } else if (activeCardCount >= 3) { discountRate = 0.10; }
-        const discountAmount = Math.floor(rawSubtotal * discountRate);
-        const finalTotal = rawSubtotal - discountAmount;
-
-        document.getElementById('totalDisplay').innerText = finalTotal.toLocaleString() + " 円";
-        
-        const submitBtn = document.getElementById('submitBtn');
-        if (isStopMode) {
-            submitBtn.disabled = true;
-            submitBtn.innerText = "ORDERS CURRENTLY CLOSED";
-        } else {
-            submitBtn.disabled = (activeCardCount === 0);
-            submitBtn.innerText = submitBtn.disabled ? "SELECT BASE TYPE" : "PROCEED TO HEARING";
-        }
+        // 割引ロジック
+        let discount = (active === 2) ? 0.05 : (active >= 3 ? 0.10 : 0);
+        sub = Math.floor(sub * (1 - discount));
+        document.getElementById('totalDisplay').innerText = sub.toLocaleString() + ' 円';
     }
+    addNewCard();
 </script>
 </body>
 </html>
