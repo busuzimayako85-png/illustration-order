@@ -216,7 +216,25 @@
         </form>
     </div>
 
-<script>
+<script type="module">
+    // 1. Firebaseの機能をネット上から読み込みます
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+    // 2. あなたのFirebase接続設定
+    const firebaseConfig = {
+        apiKey: "AIzaSyDi4twz34suKR2KXztm19FbUF-dtJN4OQU",
+        authDomain: "busuzimayako85-order.firebaseapp.com",
+        projectId: "busuzimayako85-order",
+        storageBucket: "busuzimayako85-order.firebasestorage.app",
+        messagingSenderId: "921095725285",
+        appId: "1:921095725285:web:d65f6accf6ddb28765f40c"
+    };
+
+    // 3. Firebaseの初期化
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
     const PRICES = {
         base: { face: 9000, bust: 11000, full: 12000 },
         bg: { none: 0, simple: 2000, custom: 3000, random: 6000 },
@@ -224,33 +242,24 @@
     };
 
     let cardCount = 0;
-    const urlParams = new URLSearchParams(window.location.search);
-    const isStopMode = (urlParams.get('mode') === 'stop');
 
-    // window.onload の中身を、Firebaseからステータスを取得する処理に書き換えます
+    // 4. ページが開いた時にFirebaseからデータを読み込む処理
     window.onload = async function() {
-        // URLのクエリパラメータによる停止モード判定（既存機能の維持）
         const urlParams = new URLSearchParams(window.location.search);
         let isStopMode = (urlParams.get('mode') === 'stop');
 
         try {
-            // Firebaseからインポートされた getFirestore 等がすでに上のモジュールスクリプト側で初期化されている前提ですが、
-            // もし db が定義されていない場合は、既存の firebaseConfig を使ってここで初期化します
-            if (typeof db === 'undefined' && typeof firebaseApp !== 'undefined') {
-                window.db = firebase.firestore();
-            }
-            
-            // settings コレクションの schedule ドキュメントを読み込みます
+            // 管理画面で保存した settings/schedule ドキュメントを読み込みます
             const docRef = doc(db, "settings", "schedule");
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                // スケジュール文言の書き換え
+                // スケジュールの文字を書き換え
                 if (data.text) {
                     document.getElementById('currentSchedule').innerText = data.text;
                 }
-                // サイトモード（通常 or 停止）の決定（管理画面の設定を優先）
+                // 受付モード（通常 or 停止）を管理画面の設定に切り替え
                 if (data.mode) {
                     isStopMode = (data.mode === 'stop');
                 }
@@ -259,8 +268,7 @@
             console.error("Firebaseからの読み込みに失敗しました。元の初期設定で動作します:", error);
         }
 
-        // モードに応じた画面表示の切り替え（あなたの元のロジックをそのまま適用）
-        window.currentSiteModeIsStop = isStopMode; // calculate()で使うためグローバルに保持
+        window.currentSiteModeIsStop = isStopMode; // calculate()で使うためキープ
 
         if (isStopMode) {
             document.getElementById('normalScheduleBox').style.display = 'none';
@@ -270,7 +278,6 @@
             document.getElementById('stopAlertBox').style.display = 'none';
         }
 
-        // 最初の1枚目のカードを生成
         addNewCard();
     };
 
