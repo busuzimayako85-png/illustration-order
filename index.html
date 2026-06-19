@@ -94,8 +94,204 @@
         </form>
     </div>
     <script>
-        // (元のスクリプトをここに配置してください。上記calculate等の関数はそのままです)
-        // ... (省略しますが、先ほどのaddNewCardやcalculateをそのまま使用してください)
-    </script>
+    const PRICES = {
+        base: { face: 9000, bust: 11000, full: 12000 },
+        bg: { none: 0, simple: 2000, custom: 3000, random: 6000 },
+        diff: { faceDiff: 500, poseDiff: 700, clothDiff: 1000 }
+    };
+
+    let cardCount = 0;
+    const urlParams = new URLSearchParams(window.location.search);
+    const isStopMode = (urlParams.get('mode') === 'stop');
+
+    window.onload = function() {
+        if (isStopMode) {
+            document.getElementById('normalScheduleBox').style.display = 'none';
+            document.getElementById('stopAlertBox').style.display = 'block';
+        }
+        addNewCard();
+    }
+
+    function addNewCard() {
+        cardCount++;
+        const container = document.getElementById('illustrationContainer');
+        
+        const cardHtml = `
+            <div class="illustration-card" id="card_${cardCount}">
+                <div class="card-header">
+                    <h3 class="card-title">ILLUSTRATION #${cardCount} (${cardCount}枚目)</h3>
+                    ${cardCount > 1 ? `<button type="button" class="remove-card-btn" onclick="removeCard(${cardCount})">REMOVE (削除)</button>` : ''}
+                </div>
+
+                <div class="section-title">01. SELECT BASE TYPE (必須)</div>
+                <div class="form-group">
+                    <label><input type="radio" name="base_${cardCount}" value="face" onchange="onBaseSelect(${cardCount})"> <span>フェイスアップ</span> <span class="price-text">9,000円</span></label>
+                </div>
+                <div class="form-group">
+                    <label><input type="radio" name="base_${cardCount}" value="bust" onchange="onBaseSelect(${cardCount})"> <span>バストアップ</span> <span class="price-text">11,000円</span></label>
+                </div>
+                <div class="form-group">
+                    <label><input type="radio" name="base_${cardCount}" value="full" onchange="onBaseSelect(${cardCount})"> <span>全身</span> <span class="price-text">12,000円</span></label>
+                </div>
+
+                <div class="options-wrapper locked" id="optionsWrapper_${cardCount}">
+                    <div class="section-title">02. BACKGROUND OPTIONS (任意)</div>
+                    <div class="form-group">
+                        <label><input type="radio" name="bg_${cardCount}" value="none" checked onchange="calculate()"> <span>背景なし (単色/透過/グラデ)</span> <span class="price-text">+0円</span></label>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="radio" name="bg_${cardCount}" value="simple" onchange="calculate()"> <span>簡易背景 (パターン/エフェクト)</span> <span class="price-text">+2,000円</span></label>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="radio" name="bg_${cardCount}" value="custom" onchange="calculate()"> <span>しっかり背景: 構図指定あり</span> <span class="price-text">+3,000円</span></label>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="radio" name="bg_${cardCount}" value="random" onchange="calculate()"> <span>しっかり背景: おまかせ (構図考案料込)</span> <span class="price-text">+6,000円</span></label>
+                    </div>
+
+                    <div class="section-title">03. ADDITIONAL OPTIONS (任意)</div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="faceDiffCheck_${cardCount}" onchange="toggleQty(${cardCount}, 'faceDiff')"> <span>表情差分</span> <span class="price-text">+500円 / 枚</span></label>
+                        <div class="qty-container">
+                            <button type="button" class="qty-btn" onclick="changeQty(${cardCount}, 'faceDiff', -1)">-</button>
+                            <input type="text" id="faceDiffQty_${cardCount}" class="qty-input" value="0" readonly>
+                            <button type="button" class="qty-btn" onclick="changeQty(${cardCount}, 'faceDiff', 1)">+</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="poseDiffCheck_${cardCount}" onchange="toggleQty(${cardCount}, 'poseDiff')"> <span>ポーズ差分</span> <span class="price-text">+700円 / 枚</span></label>
+                        <div class="qty-container">
+                            <button type="button" class="qty-btn" onclick="changeQty(${cardCount}, 'poseDiff', -1)">-</button>
+                            <input type="text" id="poseDiffQty_${cardCount}" class="qty-input" value="0" readonly>
+                            <button type="button" class="qty-btn" onclick="changeQty(${cardCount}, 'poseDiff', 1)">+</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="clothDiffCheck_${cardCount}" onchange="toggleQty(${cardCount}, 'clothDiff')"> <span>服装差分</span> <span class="price-text">+1,000円 / 枚</span></label>
+                        <div class="qty-container">
+                            <button type="button" class="qty-btn" onclick="changeQty(${cardCount}, 'clothDiff', -1)">-</button>
+                            <input type="text" id="clothDiffQty_${cardCount}" class="qty-input" value="0" readonly>
+                            <button type="button" class="qty-btn" onclick="changeQty(${cardCount}, 'clothDiff', 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.insertAdjacentHTML('beforeend', cardHtml);
+        calculate();
+    }
+
+    function removeCard(id) {
+        const card = document.getElementById(`card_${id}`);
+        if (card) card.remove();
+        calculate();
+    }
+
+    function onBaseSelect(id) {
+        const wrapper = document.getElementById(`optionsWrapper_${id}`);
+        if (wrapper) { wrapper.classList.remove('locked'); }
+        calculate();
+    }
+
+    function changeQty(id, type, val) {
+        const checkbox = document.getElementById(`${type}Check_${id}`);
+        if (!checkbox.checked) return;
+        const input = document.getElementById(`${type}Qty_${id}`);
+        let current = parseInt(input.value) + val;
+        if (current < 0) current = 0;
+        input.value = current;
+        calculate();
+    }
+
+    function toggleQty(id, type) {
+        const checkbox = document.getElementById(`${type}Check_${id}`);
+        const input = document.getElementById(`${type}Qty_${id}`);
+        if (!checkbox.checked) { input.value = 0; } 
+        else if (input.value == 0) { input.value = 1; }
+        calculate();
+    }
+
+    function calculate() {
+        const form = document.getElementById('orderForm');
+        let rawSubtotal = 0; // 割引前の小計
+        let activeCardCount = 0; // ベースが選択されているイラストの枚数
+        let allBasesSelected = true;
+
+        const cards = document.querySelectorAll('.illustration-card');
+        if (cards.length === 0) { allBasesSelected = false; }
+
+        cards.forEach(card => {
+            const id = card.id.split('_')[1];
+            const baseRadio = form.elements[`base_${id}`].value;
+            const bgRadio = form.elements[`bg_${id}`] ? form.elements[`bg_${id}`].value : 'none';
+
+            if (!baseRadio) {
+                allBasesSelected = false;
+                return; 
+            }
+
+            activeCardCount++;
+            rawSubtotal += PRICES.base[baseRadio];
+            rawSubtotal += PRICES.bg[bgRadio];
+
+            ['faceDiff', 'poseDiff', 'clothDiff'].forEach(type => {
+                const checkbox = document.getElementById(`${type}Check_${id}`);
+                const qtyInput = document.getElementById(`${type}Qty_${id}`);
+                if (checkbox && checkbox.checked && qtyInput) {
+                    rawSubtotal += PRICES.diff[type] * parseInt(qtyInput.value);
+                }
+            });
+        });
+
+        // ─── 複数枚割引の判定ロジック ───
+        let discountRate = 0; 
+        if (activeCardCount === 2) {
+            discountRate = 0.05; // 2枚で 5% OFF
+        } else if (activeCardCount >= 3) {
+            discountRate = 0.10; // 3枚以上で 10% OFF
+        }
+
+        const discountAmount = Math.floor(rawSubtotal * discountRate); // 割引額（端数切り捨て）
+        const finalTotal = rawSubtotal - discountAmount; // 最終合計金額
+
+        // 表示のコントロール
+        const subtotalWrapper = document.getElementById('subtotalWrapper');
+        const discountWrapper = document.getElementById('discountWrapper');
+
+        if (discountRate > 0 && rawSubtotal > 0) {
+            // 割引がある時だけ、小計と割引額の行を表示する
+            subtotalWrapper.style.display = 'block';
+            discountWrapper.style.display = 'block';
+            document.getElementById('subtotalDisplay').innerText = rawSubtotal.toLocaleString() + " 円";
+            document.getElementById('discountPercent').innerText = (discountRate * 100).toString();
+            document.getElementById('discountDisplay').innerText = discountAmount.toLocaleString() + " 円";
+        } else {
+            // 1枚の時はすっきりさせるために非表示
+            subtotalWrapper.style.display = 'none';
+            discountWrapper.style.display = 'none';
+        }
+
+        // 最終合計金額の表示更新
+        document.getElementById('totalDisplay').innerText = finalTotal.toLocaleString() + " 円";
+
+        // 枚数追加ボタンと送信ボタンの制御
+        document.getElementById('addCardBtn').disabled = !allBasesSelected;
+        const submitBtn = document.getElementById('submitBtn');
+        
+        if (isStopMode) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = "ORDERS CURRENTLY CLOSED";
+        } else {
+            if (allBasesSelected && finalTotal > 0) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "PROCEED TO HEARING";
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.innerText = "SELECT BASE TYPE TO PROCEED";
+            }
+        }
+    }
+</script>
 </body>
 </html>
