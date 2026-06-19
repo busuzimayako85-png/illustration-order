@@ -19,46 +19,52 @@
         .options-wrapper { position: relative; }
         .options-wrapper.locked { opacity: 0.2; pointer-events: none; user-select: none; }
         .schedule-box { background: #151515; border: 1px solid #333; padding: 20px; border-radius: 4px; margin-bottom: 30px; }
-        .stop-alert-box { display: none; background: #2a0000; border: 2px solid #ff0000; color: #ff3333; padding: 15px; border-radius: 4px; margin-bottom: 30px; font-weight: bold; }
+        .stop-alert-box { display: none; background: #2a0000; border: 2px solid #ff0000; color: #ff3333; padding: 15px; border-radius: 4px; margin-bottom: 30px; font-weight: bold; text-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
         .form-group { margin-bottom: 10px; }
         label { display: flex; align-items: center; cursor: pointer; padding: 12px 15px; background: #161616; border-radius: 4px; border: 1px solid #222; font-size: 14px; }
         label:hover { background: #222; border-color: #ff0055; }
-        input[type="radio"]:checked + span, input[type="checkbox"]:checked + span { color: #7cfc00; }
+        input[type="radio"]:checked + span, input[type="checkbox"]:checked + span { color: #7cfc00; text-shadow: 0 0 8px rgba(124, 252, 0, 0.6); }
         .price-text { margin-left: auto; color: #888; font-weight: bold; }
         .qty-container { display: flex; align-items: center; margin-top: 8px; padding-left: 30px; }
         .qty-btn { background: #222; color: #fff; border: 1px solid #444; width: 28px; height: 28px; cursor: pointer; font-weight: bold; }
+        .qty-btn:hover { background: #ff0055; border-color: #ff0055; }
         .qty-input { width: 40px; text-align: center; background: #000; color: #7cfc00; border: 1px solid #333; height: 26px; font-size: 14px; }
-        .btn-row { display: flex; gap: 10px; }
-        .add-card-btn { flex: 2; background: #000; color: #7cfc00; border: 2px dashed #7cfc00; padding: 15px; font-weight: bold; cursor: pointer; }
-        .clear-btn { flex: 1; background: #222; color: #aaa; border: 1px solid #444; cursor: pointer; }
-        .clear-btn:hover { background: #444; color: #fff; }
-        .total-box { margin-top: 40px; padding: 30px; background: #1a0007; border: 2px solid #ff0055; text-align: center; }
-        .total-price { font-size: 42px; font-weight: bold; color: #ff0055; }
-        .submit-btn { width: 100%; background: #ff0055; color: white; border: none; padding: 20px; font-size: 20px; font-weight: bold; cursor: pointer; margin-top: 25px; }
-        .submit-btn:disabled { background: #222; color: #555; cursor: not-allowed; }
-        @media (max-width: 900px) { body { flex-direction: column; } .left-panel { width: 100%; height: auto; position: relative; } .right-panel { width: 100%; margin-left: 0; } }
+        .add-card-btn { width: 100%; background: #000; color: #7cfc00; border: 2px dashed #7cfc00; padding: 15px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; letter-spacing: 1px; transition: all 0.2s; }
+        .add-card-btn:hover { background: #7cfc00; color: #000; box-shadow: 0 0 15px rgba(124, 252, 0, 0.4); }
+        .add-card-btn:disabled { opacity: 0.3; cursor: not-allowed; background: none !important; color: #444 !important; border-color: #444 !important; box-shadow: none !important; }
+        .total-box { margin-top: 40px; padding: 30px; background: #1a0007; border: 2px solid #ff0055; border-radius: 4px; text-align: center; box-shadow: 0 0 20px rgba(255, 0, 85, 0.3); }
+        .subtotal-text { font-size: 14px; color: #aaa; margin-bottom: 5px; }
+        .discount-text { font-size: 18px; color: #ffffff; font-weight: bold; margin-bottom: 15px; padding: 8px; background: #4d001a; border-radius: 4px; }
+        .discount-highlight { color: #7cfc00; }
+        .total-price { font-size: 42px; font-weight: bold; color: #ff0055; text-shadow: 0 0 15px rgba(255, 0, 85, 0.8); }
+        .submit-btn { width: 100%; background: #ff0055; color: white; border: none; padding: 20px; font-size: 20px; font-weight: bold; letter-spacing: 2px; cursor: pointer; margin-top: 25px; box-shadow: 0 4px 0 #b3003b; }
+        .submit-btn:hover { background: #ff266f; box-shadow: 0 0 15px rgba(255, 0, 85, 0.6); }
+        .submit-btn:disabled { background: #222 !important; color: #555 !important; box-shadow: none !important; cursor: not-allowed !important; }
+        @media (max-width: 900px) { body { flex-direction: column; } .left-panel { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 4px solid #ff0055; padding: 40px 20px; } .right-panel { width: 100%; margin-left: 0; padding: 20px; } }
     </style>
 </head>
 <body>
     <div class="left-panel">
-        <div class="logo-area"><p>[ ロゴ ]</p></div>
+        <div class="logo-area"><p style="padding: 20px; font-size: 14px;">[ ロゴ ]</p></div>
         <div class="info-text">busuzimayako85</div>
+        <div style="font-size: 12px; color: #666;">ILLUSTRATION ORDER</div>
     </div>
     <div class="right-panel">
-        <h1>ORDER & ESTIMATION</h1>
-        <div class="schedule-box" id="normalScheduleBox">【NOTICE】現在受付中</div>
-        <div class="stop-alert-box" id="stopAlertBox">⚠️ 只今、新規依頼停止中</div>
+        <h1 style="margin-top: 0; font-size: 32px; letter-spacing: 2px;">ORDER & ESTIMATION</h1>
+        <div class="schedule-box" id="normalScheduleBox"><span style="color: #ff0055; font-weight: bold;">【NOTICE】</span> <span id="currentSchedule">現在受付中</span></div>
+        <div class="stop-alert-box" id="stopAlertBox">⚠️ 【只今、新規のご依頼を停止しております】</div>
         <form id="orderForm">
             <div id="illustrationContainer"></div>
-            <div class="btn-row">
-                <button type="button" id="addCardBtn" class="add-card-btn" onclick="addNewCard()">+ ADD</button>
-                <button type="button" class="clear-btn" onclick="resetForm()">CLEAR</button>
-            </div>
+            <button type="button" id="addCardBtn" class="add-card-btn" onclick="addNewCard()">+ ADD ANOTHER ILLUSTRATION (枚数を追加する)</button>
             <div class="total-box">
-                <div>ESTIMATED TOTAL</div>
+                <div class="subtotal-text" id="subtotalWrapper" style="display:none;">小計: <span id="subtotalDisplay">0 円</span></div>
+                <div class="discount-text" id="discountWrapper" style="display:none;">
+                    <span class="discount-highlight">まとめ買い割引 (<span id="discountPercent">0</span>% OFF)</span>: -<span id="discountDisplay">0 円</span>
+                </div>
+                <div style="font-size: 13px; letter-spacing: 1px; color: #aaa;">最終合計金額</div>
                 <div class="total-price" id="totalDisplay">0 円</div>
             </div>
-            <button type="submit" id="submitBtn" class="submit-btn" disabled>PROCEED</button>
+            <button type="submit" id="submitBtn" class="submit-btn" disabled>PROCEED TO HEARING</button>
         </form>
     </div>
 <script>
@@ -66,7 +72,6 @@
     let cardCount = 0;
     const isStopMode = (new URLSearchParams(window.location.search).get('mode') === 'stop');
     window.onload = () => { if (isStopMode) { document.getElementById('normalScheduleBox').style.display='none'; document.getElementById('stopAlertBox').style.display='block'; } addNewCard(); }
-    
     function addNewCard() {
         cardCount++;
         document.getElementById('illustrationContainer').insertAdjacentHTML('beforeend', `
@@ -88,31 +93,30 @@
             </div>`);
         calculate();
     }
-    
-    function resetForm() {
-        document.getElementById('illustrationContainer').innerHTML = '';
-        cardCount = 0;
-        addNewCard();
-    }
-
     function removeCard(id) { document.getElementById(`card_${id}`).remove(); calculate(); }
     function onBaseSelect(id) { document.getElementById(`optionsWrapper_${id}`).classList.remove('locked'); calculate(); }
     function changeQty(id, type, val) { const c = document.getElementById(`${type}Check_${id}`); if(!c.checked) return; const i = document.getElementById(`${type}Qty_${id}`); i.value = Math.max(0, parseInt(i.value)+val); calculate(); }
     function toggleQty(id, type) { const c = document.getElementById(`${type}Check_${id}`); const i = document.getElementById(`${type}Qty_${id}`); i.value = c.checked ? (i.value==0?1:i.value) : 0; calculate(); }
     function calculate() {
-        let sub = 0, allBase = true;
+        let sub = 0, count = 0, allBase = true;
         document.querySelectorAll('.illustration-card').forEach(c => {
             let id = c.id.split('_')[1];
             let b = document.querySelector(`input[name="base_${id}"]:checked`), bg = document.querySelector(`input[name="bg_${id}"]:checked`);
             if(!b) { allBase = false; return; }
-            sub += PRICES.base[b.value] + PRICES.bg[bg.value];
+            count++; sub += PRICES.base[b.value] + PRICES.bg[bg.value];
             ['faceDiff','poseDiff','clothDiff'].forEach(t => { if(document.getElementById(`${t}Check_${id}`).checked) sub += PRICES.diff[t] * document.getElementById(`${t}Qty_${id}`).value; });
         });
-        document.getElementById('totalDisplay').innerText = sub.toLocaleString() + ' 円';
+        let rate = (count>=3) ? 0.1 : (count==2 ? 0.05 : 0);
+        let disc = Math.floor(sub * rate);
+        document.getElementById('subtotalWrapper').style.display = document.getElementById('discountWrapper').style.display = (rate>0?'block':'none');
+        document.getElementById('subtotalDisplay').innerText = sub.toLocaleString() + ' 円';
+        document.getElementById('discountPercent').innerText = rate*100;
+        document.getElementById('discountDisplay').innerText = disc.toLocaleString() + ' 円';
+        document.getElementById('totalDisplay').innerText = (sub - disc).toLocaleString() + ' 円';
         document.getElementById('addCardBtn').disabled = !allBase;
         const btn = document.getElementById('submitBtn');
         btn.disabled = isStopMode || !allBase || sub==0;
-        btn.innerText = isStopMode ? "CLOSED" : "PROCEED";
+        btn.innerText = isStopMode ? "ORDERS CURRENTLY CLOSED" : "PROCEED TO HEARING";
     }
 </script>
 </body>
