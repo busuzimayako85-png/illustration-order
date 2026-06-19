@@ -100,4 +100,37 @@
                 <div class="section-title">01. BASE TYPE</div>
                 <div class="form-group"><label><input type="radio" name="base_${cardCount}" value="face" onchange="onBaseSelect(${cardCount})"> <span>フェイスアップ</span> <span class="price-text">9,000円</span></label></div>
                 <div class="form-group"><label><input type="radio" name="base_${cardCount}" value="bust" onchange="onBaseSelect(${cardCount})"> <span>バストアップ</span> <span class="price-text">11,000円</span></label></div>
-                <div class="form-group"><label><input type="radio" name="base_${cardCount}" value="full" onchange="onBaseSelect(${cardCount})"> <span>全身</span>
+                <div class="form-group"><label><input type="radio" name="base_${cardCount}" value="full" onchange="onBaseSelect(${cardCount})"> <span>全身</span> <span class="price-text">12,000円</span></label></div>
+                <div class="options-wrapper locked" id="optionsWrapper_${cardCount}">
+                    <div class="section-title">02. BACKGROUND</div>
+                    <div class="form-group"><label><input type="radio" name="bg_${cardCount}" value="none" checked onchange="calculate()"> <span>背景なし</span> <span class="price-text">+0円</span></label></div>
+                    <div class="form-group"><label><input type="radio" name="bg_${cardCount}" value="simple" onchange="calculate()"> <span>簡易背景</span> <span class="price-text">+2,000円</span></label></div>
+                    <div class="form-group"><label><input type="radio" name="bg_${cardCount}" value="custom" onchange="calculate()"> <span>指定背景</span> <span class="price-text">+3,000円</span></label></div>
+                    <div class="form-group"><label><input type="radio" name="bg_${cardCount}" value="random" onchange="calculate()"> <span>おまかせ背景</span> <span class="price-text">+6,000円</span></label></div>
+                    <div class="section-title">03. OPTIONS</div>
+                    ${['faceDiff','poseDiff','clothDiff'].map((t,i)=>`<div class="form-group"><label><input type="checkbox" id="${t}Check_${cardCount}" onchange="toggleQty(${cardCount},'${t}')"> <span>${['表情','ポーズ','服装'][i]}差分</span> <span class="price-text">+${[500,700,1000][i]}円</span></label><div class="qty-container"><button type="button" class="qty-btn" onclick="changeQty(${cardCount},'${t}',-1)">-</button><input type="text" id="${t}Qty_${cardCount}" class="qty-input" value="0" readonly><button type="button" class="qty-btn" onclick="changeQty(${cardCount},'${t}',1)">+</button></div></div>`).join('')}
+                </div>
+            </div>`);
+        calculate();
+    }
+    function resetForm() { document.getElementById('illustrationContainer').innerHTML = ''; cardCount = 0; addNewCard(); }
+    function removeCard(id) { document.getElementById(`card_${id}`).remove(); calculate(); }
+    function onBaseSelect(id) { document.getElementById(`optionsWrapper_${id}`).classList.remove('locked'); calculate(); }
+    function changeQty(id, type, val) { const c = document.getElementById(`${type}Check_${id}`); if(!c.checked) return; const i = document.getElementById(`${type}Qty_${id}`); i.value = Math.max(0, parseInt(i.value)+val); calculate(); }
+    function toggleQty(id, type) { const c = document.getElementById(`${type}Check_${id}`); const i = document.getElementById(`${type}Qty_${id}`); i.value = c.checked ? (i.value==0?1:i.value) : 0; calculate(); }
+    function calculate() {
+        let sub = 0;
+        document.querySelectorAll('.illustration-card').forEach(c => {
+            let id = c.id.split('_')[1];
+            let b = document.querySelector(`input[name="base_${id}"]:checked`), bg = document.querySelector(`input[name="bg_${id}"]:checked`);
+            if(b) {
+                sub += PRICES.base[b.value] + PRICES.bg[bg.value];
+                ['faceDiff','poseDiff','clothDiff'].forEach(t => { if(document.getElementById(`${t}Check_${id}`).checked) sub += PRICES.diff[t] * document.getElementById(`${t}Qty_${id}`).value; });
+            }
+        });
+        document.getElementById('totalDisplay').innerText = sub.toLocaleString() + ' 円';
+    }
+    window.onload = addNewCard;
+</script>
+</body>
+</html>
