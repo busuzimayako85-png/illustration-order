@@ -91,7 +91,6 @@
             letter-spacing: 1px;
         }
 
-        /* 削除ボタン */
         .remove-card-btn {
             background: none;
             border: 1px solid #ff0055;
@@ -101,10 +100,7 @@
             font-size: 12px;
             font-weight: bold;
         }
-        .remove-card-btn:hover {
-            background: #ff0055;
-            color: #fff;
-        }
+        .remove-card-btn:hover { background: #ff0055; color: #fff; }
 
         .section-title {
             font-size: 16px;
@@ -116,16 +112,8 @@
         }
 
         /* 未選択時のロック用カバー */
-        .options-wrapper {
-            position: relative;
-        }
-        
-        /* ベース未選択時にオプションを暗くして触れなくする設定 */
-        .options-wrapper.locked {
-            opacity: 0.2;
-            pointer-events: none; /* クリックを完全に無効化 */
-            user-select: none;
-        }
+        .options-wrapper { position: relative; }
+        .options-wrapper.locked { opacity: 0.2; pointer-events: none; user-select: none; }
 
         /* スケジュール案内・アラート */
         .schedule-box { background: #151515; border: 1px solid #333; padding: 20px; border-radius: 4px; margin-bottom: 30px; }
@@ -158,22 +146,22 @@
             letter-spacing: 1px;
             transition: all 0.2s;
         }
-        .add-card-btn:hover {
-            background: #7cfc00;
-            color: #000;
-            box-shadow: 0 0 15px rgba(124, 252, 0, 0.4);
-        }
-        .add-card-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            background: none !important;
-            color: #444 !important;
-            border-color: #444 !important;
-            box-shadow: none !important;
-        }
+        .add-card-btn:hover { background: #7cfc00; color: #000; box-shadow: 0 0 15px rgba(124, 252, 0, 0.4); }
+        .add-card-btn:disabled { opacity: 0.3; cursor: not-allowed; background: none !important; color: #444 !important; border-color: #444 !important; box-shadow: none !important; }
 
-        .total-box { margin-top: 40px; padding: 30px; background: #1a0007; border: 2px solid #ff0055; border-radius: 4px; text-align: center; box-shadow: 0 0 20px rgba(255, 0, 85, 0.3); }
-        .total-price { font-size: 42px; font-weight: bold; color: #ff0055; text-shadow: 0 0 15px rgba(255, 0, 85, 0.8); margin-top: 10px; }
+        /* 金額表示ボックス（割引表示付きにパワーアップ） */
+        .total-box {
+            margin-top: 40px;
+            padding: 30px;
+            background: #1a0007;
+            border: 2px solid #ff0055;
+            border-radius: 4px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
+        }
+        .subtotal-text { font-size: 14px; color: #888; margin-bottom: 5px; }
+        .discount-text { font-size: 15px; color: #7cfc00; font-weight: bold; margin-bottom: 15px; text-shadow: 0 0 5px rgba(124, 252, 0, 0.5); }
+        .total-price { font-size: 42px; font-weight: bold; color: #ff0055; text-shadow: 0 0 15px rgba(255, 0, 85, 0.8); }
         
         .submit-btn { width: 100%; background: #ff0055; color: white; border: none; padding: 20px; font-size: 20px; font-weight: bold; letter-spacing: 2px; cursor: pointer; margin-top: 25px; box-shadow: 0 4px 0 #b3003b; }
         .submit-btn:hover { background: #ff266f; box-shadow: 0 0 15px rgba(255, 0, 85, 0.6); }
@@ -212,15 +200,15 @@
         </div>
 
         <form id="orderForm">
-            <!-- イラストカードが追加されていくエリア -->
             <div id="illustrationContainer"></div>
 
-            <!-- 枚数を追加するボタン -->
             <button type="button" id="addCardBtn" class="add-card-btn" onclick="addNewCard()">+ ADD ANOTHER ILLUSTRATION (枚数を追加する)</button>
 
-            <!-- 合計金額 -->
+            <!-- パワーアップした合計金額ボックス -->
             <div class="total-box">
-                <div style="font-size: 14px; letter-spacing: 1px; color: #aaa;">ESTIMATED TOTAL (合計金額)</div>
+                <div class="subtotal-text" id="subtotalWrapper" style="display:none;">SUBTOTAL (小計): <span id="subtotalDisplay">0 円</span></div>
+                <div class="discount-text" id="discountWrapper" style="display:none;">MULTIPLE DISCOUNT (<span id="discountPercent">0</span>% OFF): -<span id="discountDisplay">0 円</span></div>
+                <div style="font-size: 13px; letter-spacing: 1px; color: #aaa;">ESTIMATED TOTAL (最終合計金額)</div>
                 <div class="total-price" id="totalDisplay">0 円</div>
             </div>
 
@@ -244,11 +232,9 @@
             document.getElementById('normalScheduleBox').style.display = 'none';
             document.getElementById('stopAlertBox').style.display = 'block';
         }
-        // 最初に1枚目の入力枠を自動で作成
         addNewCard();
     }
 
-    // 新しいイラストの入力カードを追加する関数
     function addNewCard() {
         cardCount++;
         const container = document.getElementById('illustrationContainer');
@@ -260,7 +246,6 @@
                     ${cardCount > 1 ? `<button type="button" class="remove-card-btn" onclick="removeCard(${cardCount})">REMOVE (削除)</button>` : ''}
                 </div>
 
-                <!-- STEP 1: ベースタイプ（必須） -->
                 <div class="section-title">01. SELECT BASE TYPE (必須)</div>
                 <div class="form-group">
                     <label><input type="radio" name="base_${cardCount}" value="face" onchange="onBaseSelect(${cardCount})"> <span>フェイスアップ</span> <span class="price-text">9,000円</span></label>
@@ -272,9 +257,7 @@
                     <label><input type="radio" name="base_${cardCount}" value="full" onchange="onBaseSelect(${cardCount})"> <span>全身</span> <span class="price-text">12,000円</span></label>
                 </div>
 
-                <!-- オプションエリア（初期状態は locked クラスをつけて触れなくする） -->
                 <div class="options-wrapper locked" id="optionsWrapper_${cardCount}">
-                    <!-- STEP 2: 背景（任意） -->
                     <div class="section-title">02. BACKGROUND OPTIONS (任意)</div>
                     <div class="form-group">
                         <label><input type="radio" name="bg_${cardCount}" value="none" checked onchange="calculate()"> <span>背景なし (単色/透過/グラデ)</span> <span class="price-text">+0円</span></label>
@@ -289,7 +272,6 @@
                         <label><input type="radio" name="bg_${cardCount}" value="random" onchange="calculate()"> <span>しっかり背景: おまかせ (構図考案料込)</span> <span class="price-text">+6,000円</span></label>
                     </div>
 
-                    <!-- STEP 3: 追加オプション（任意） -->
                     <div class="section-title">03. ADDITIONAL OPTIONS (任意)</div>
                     <div class="form-group">
                         <label><input type="checkbox" id="faceDiffCheck_${cardCount}" onchange="toggleQty(${cardCount}, 'faceDiff')"> <span>表情差分</span> <span class="price-text">+500円 / 枚</span></label>
@@ -323,19 +305,15 @@
         calculate();
     }
 
-    // イラストカードを削除する関数
     function removeCard(id) {
         const card = document.getElementById(`card_${id}`);
         if (card) card.remove();
         calculate();
     }
 
-    // ベースタイプが選ばれた時にロックを解除する関数
     function onBaseSelect(id) {
         const wrapper = document.getElementById(`optionsWrapper_${id}`);
-        if (wrapper) {
-            wrapper.classList.remove('locked'); // ロック解除（明るくなって操作可能に）
-        }
+        if (wrapper) { wrapper.classList.remove('locked'); }
         calculate();
     }
 
@@ -359,54 +337,76 @@
 
     function calculate() {
         const form = document.getElementById('orderForm');
-        let grandTotal = 0;
+        let rawSubtotal = 0; // 割引前の小計
+        let activeCardCount = 0; // ベースが選択されているイラストの枚数
         let allBasesSelected = true;
 
-        // 現在画面にあるすべてのイラストカードをループ処理
         const cards = document.querySelectorAll('.illustration-card');
-        
-        if (cards.length === 0) {
-            allBasesSelected = false;
-        }
+        if (cards.length === 0) { allBasesSelected = false; }
 
         cards.forEach(card => {
             const id = card.id.split('_')[1];
             const baseRadio = form.elements[`base_${id}`].value;
             const bgRadio = form.elements[`bg_${id}`] ? form.elements[`bg_${id}`].value : 'none';
 
-            // 1つでもベースが選ばれていないカードがあればフラグを折る
             if (!baseRadio) {
                 allBasesSelected = false;
                 return; 
             }
 
-            // 金額加算
-            grandTotal += PRICES.base[baseRadio];
-            grandTotal += PRICES.bg[bgRadio];
+            activeCardCount++;
+            rawSubtotal += PRICES.base[baseRadio];
+            rawSubtotal += PRICES.bg[bgRadio];
 
             ['faceDiff', 'poseDiff', 'clothDiff'].forEach(type => {
                 const checkbox = document.getElementById(`${type}Check_${id}`);
                 const qtyInput = document.getElementById(`${type}Qty_${id}`);
                 if (checkbox && checkbox.checked && qtyInput) {
-                    grandTotal += PRICES.diff[type] * parseInt(qtyInput.value);
+                    rawSubtotal += PRICES.diff[type] * parseInt(qtyInput.value);
                 }
             });
         });
 
-        // 合計金額の表示更新
-        document.getElementById('totalDisplay').innerText = grandTotal.toLocaleString() + " 円";
+        // ─── 複数枚割引の判定ロジック ───
+        let discountRate = 0; 
+        if (activeCardCount === 2) {
+            discountRate = 0.05; // 2枚で 5% OFF
+        } else if (activeCardCount >= 3) {
+            discountRate = 0.10; // 3枚以上で 10% OFF
+        }
 
-        // 「枚数を追加するボタン」の制御：現在表示中のカードのベースが全部選ばれていれば押せる
+        const discountAmount = Math.floor(rawSubtotal * discountRate); // 割引額（端数切り捨て）
+        const finalTotal = rawSubtotal - discountAmount; // 最終合計金額
+
+        // 表示のコントロール
+        const subtotalWrapper = document.getElementById('subtotalWrapper');
+        const discountWrapper = document.getElementById('discountWrapper');
+
+        if (discountRate > 0 && rawSubtotal > 0) {
+            // 割引がある時だけ、小計と割引額の行を表示する
+            subtotalWrapper.style.display = 'block';
+            discountWrapper.style.display = 'block';
+            document.getElementById('subtotalDisplay').innerText = rawSubtotal.toLocaleString() + " 円";
+            document.getElementById('discountPercent').innerText = (discountRate * 100).toString();
+            document.getElementById('discountDisplay').innerText = discountAmount.toLocaleString() + " 円";
+        } else {
+            // 1枚の時はすっきりさせるために非表示
+            subtotalWrapper.style.display = 'none';
+            discountWrapper.style.display = 'none';
+        }
+
+        // 最終合計金額の表示更新
+        document.getElementById('totalDisplay').innerText = finalTotal.toLocaleString() + " 円";
+
+        // 枚数追加ボタンと送信ボタンの制御
         document.getElementById('addCardBtn').disabled = !allBasesSelected;
-
-        // 送信ボタンの制御
         const submitBtn = document.getElementById('submitBtn');
+        
         if (isStopMode) {
             submitBtn.disabled = true;
             submitBtn.innerText = "ORDERS CURRENTLY CLOSED";
         } else {
-            // ベースが全部選ばれていて、かつ合計金額が0より大きい場合のみ進める
-            if (allBasesSelected && grandTotal > 0) {
+            if (allBasesSelected && finalTotal > 0) {
                 submitBtn.disabled = false;
                 submitBtn.innerText = "PROCEED TO HEARING";
             } else {
