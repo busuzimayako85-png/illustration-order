@@ -6,16 +6,25 @@
     <style>
         body { background: #111; color: #fff; padding: 20px; font-family: sans-serif; }
         .order-item { background: #222; border: 1px solid #ff0055; padding: 15px; margin-bottom: 10px; }
+        #authBox { text-align: center; margin-top: 50px; }
     </style>
 </head>
 <body>
-    <h1>ORDER LIST</h1>
-    <div id="orderList">読み込み中...</div>
+    <div id="authBox">
+        <input type="password" id="password" placeholder="パスワードを入力">
+        <button onclick="checkPassword()">ログイン</button>
+    </div>
+    
+    <div id="content" style="display:none;">
+        <h1>ORDER LIST</h1>
+        <div id="orderList">読み込み中...</div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
+        // 設定値はそのまま維持してください
         const firebaseConfig = {
             apiKey: "AIzaSyDi4twz34suKR2KXztm19FbUF-dtJN4OQU",
             authDomain: "busuzimayako85-order.firebaseapp.com",
@@ -27,6 +36,18 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // パスワードチェック機能
+        window.checkPassword = async function() {
+            const pass = document.getElementById('password').value;
+            if(pass === "1234") { // ここに好きなパスワードを設定してください
+                document.getElementById('authBox').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                loadOrders();
+            } else {
+                alert("パスワードが違います");
+            }
+        };
+
         async function loadOrders() {
             const querySnapshot = await getDocs(collection(db, "orders"));
             const list = document.getElementById('orderList');
@@ -37,11 +58,10 @@
                     <div class="order-item">
                         <strong>名前:</strong> ${data.name}<br>
                         <strong>詳細:</strong> ${data.message}<br>
-                        <strong>金額:</strong> ${data.total}
+                        <strong>合計:</strong> ${data.total}
                     </div>`;
             });
         }
-        loadOrders();
     </script>
 </body>
 </html>
