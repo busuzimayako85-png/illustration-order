@@ -16,7 +16,7 @@
             min-height: 100vh;
         }
 
-        /* ─── 画面左側：Webサイトらしい固定看板・ギャラリーエリア ─── */
+        /* ─── 画面左側：Webサイトらしい固定看板エリア ─── */
         .left-panel {
             width: 40%;
             position: fixed;
@@ -28,7 +28,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            border-right: 4px solid #ff0055; /* ロゴに合わせた鮮烈な赤の境界線 */
+            border-right: 4px solid #ff0055;
             box-sizing: border-box;
             padding: 4px;
         }
@@ -38,7 +38,7 @@
             max-width: 350px;
             aspect-ratio: 1;
             background: #111;
-            border: 2px dashed #7cfc00; /* ネオン黄緑の枠線（仮） */
+            border: 2px dashed #7cfc00;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -49,17 +49,17 @@
         }
 
         .info-text {
-            color: #7cfc00; /* ロゴの黄緑 */
+            color: #7cfc00;
             font-size: 14px;
             letter-spacing: 2px;
             text-shadow: 0 0 5px rgba(124, 252, 0, 0.5);
             margin-bottom: 10px;
         }
 
-        /* ─── 画面右側：スクロールするメインコンテンツ（見積もり） ─── */
+        /* ─── 画面右側：スクロールするメインコンテンツ ─── */
         .right-panel {
             width: 60%;
-            margin-left: 40%; /* 左パネルの分だけ空ける */
+            margin-left: 40%;
             padding: 50px;
             box-sizing: border-box;
         }
@@ -67,7 +67,7 @@
         .section-title {
             font-size: 24px;
             color: #ffffff;
-            border-left: 6px solid #7cfc00; /* 黄緑のアクセント */
+            border-left: 6px solid #7cfc00;
             padding-left: 12px;
             margin-top: 40px;
             margin-bottom: 20px;
@@ -81,6 +81,20 @@
             padding: 20px;
             border-radius: 4px;
             margin-bottom: 30px;
+        }
+
+        /* 依頼停止時用の特別な警告アラート */
+        .stop-alert-box {
+            display: none; /* 普段は隠す */
+            background: #2a0000;
+            border: 2px solid #ff0000;
+            color: #ff3333;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+            letter-spacing: 1px;
         }
 
         /* 選択項目のカスタムスタイル */
@@ -104,10 +118,9 @@
             border-color: #ff0055;
         }
 
-        /* ラジオボタン・チェックボックスが選ばれた時の赤×黄緑の発光 */
         input[type="radio"]:checked + span,
         input[type="checkbox"]:checked + span {
-            color: #7cfc00; /* 選ばれたら黄緑に */
+            color: #7cfc00;
             text-shadow: 0 0 8px rgba(124, 252, 0, 0.6);
         }
 
@@ -151,7 +164,7 @@
             font-size: 16px;
         }
 
-        /* 見積もり合計（赤のネオン） */
+        /* 見積もり合計 */
         .total-box {
             margin-top: 40px;
             padding: 30px;
@@ -190,14 +203,14 @@
             box-shadow: 0 0 15px rgba(255, 0, 85, 0.6);
         }
 
+        /* 完全にロックされた時の見た目（グレーアウト） */
         .submit-btn:disabled {
-            background: #222;
-            color: #555;
-            box-shadow: none;
-            cursor: not-allowed;
+            background: #222 !important;
+            color: #555 !important;
+            box-shadow: none !important;
+            cursor: not-allowed !important;
         }
 
-        /* スマホで見たら縦並びにするための設定（レスポンシブ） */
         @media (max-width: 900px) {
             body { flex-direction: column; }
             .left-panel { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 4px solid #ff0055; padding: 40px 20px; }
@@ -207,27 +220,28 @@
 </head>
 <body>
 
-    <!-- 左側：ブランド看板エリア -->
     <div class="left-panel">
         <div class="logo-area">
-            <!-- 実際に公開した後はここにimage_64c9bf.jpgを入れます -->
             <p style="padding: 20px; font-size: 14px;">[ ここにロゴ画像 <br>image_64c9bf.jpg が<br>大きく表示されます ]</p>
         </div>
         <div class="info-text">busuzimayako85</div>
         <div style="font-size: 12px; color: #666;">ILLUSTRATION ONLINE ORDER SYSTEM</div>
     </div>
 
-    <!-- 右側：メイン操作エリア -->
     <div class="right-panel">
         <h1 style="margin-top: 0; font-size: 32px; letter-spacing: 2px;">ORDER & ESTIMATION</h1>
         
-        <div class="schedule-box">
+        <div class="schedule-box" id="normalScheduleBox">
             <span style="color: #ff0055; font-weight: bold;">【NOTICE】</span> 
             <span id="currentSchedule">現在【7月以降】受付中（残り2枠）</span>
         </div>
 
+        <div class="stop-alert-box" id="stopAlertBox">
+            ⚠️ 【只今、新規のご依頼を停止しております】<br>
+            現在、お見積もりのシミュレーションのみご利用いただけます。再開まで今しばらくお待ちください。
+        </div>
+
         <form id="orderForm">
-            <!-- STEP 1 -->
             <div class="section-title">01. SELECT BASE TYPE (必須)</div>
             <div class="form-group">
                 <label><input type="radio" name="base" value="face" onchange="calculate()"> <span>フェイスアップ</span> <span class="price-text">9,000円</span></label>
@@ -239,7 +253,6 @@
                 <label><input type="radio" name="base" value="full" onchange="calculate()"> <span>全身</span> <span class="price-text">12,000円</span></label>
             </div>
 
-            <!-- STEP 2 -->
             <div class="section-title">02. BACKGROUND OPTIONS (任意)</div>
             <div class="form-group">
                 <label><input type="radio" name="bg" value="none" checked onchange="calculate()"> <span>背景なし (単色/透過/グラデ)</span> <span class="price-text">+0円</span></label>
@@ -254,7 +267,6 @@
                 <label><input type="radio" name="bg" value="random" onchange="calculate()"> <span>しっかり背景: おまかせ (構図考案料込)</span> <span class="price-text">+6,000円</span></label>
             </div>
 
-            <!-- STEP 3 -->
             <div class="section-title">03. ADDITIONAL OPTIONS (任意)</div>
             <div class="form-group">
                 <label><input type="checkbox" id="faceDiffCheck" onchange="toggleQty('faceDiff')"> <span>表情差分</span> <span class="price-text">+500円 / 枚</span></label>
@@ -281,7 +293,6 @@
                 </div>
             </div>
 
-            <!-- 合計金額 -->
             <div class="total-box">
                 <div style="font-size: 14px; letter-spacing: 1px; color: #aaa;">ESTIMATED TOTAL</div>
                 <div class="total-price" id="totalDisplay">0 円</div>
@@ -297,6 +308,19 @@
         bg: { none: 0, simple: 2000, custom: 3000, random: 6000 },
         diff: { faceDiff: 500, poseDiff: 700, clothDiff: 1000 }
     };
+
+    // ─── URLの「?mode=stop」をチェックする仕掛け ───
+    const urlParams = new URLSearchParams(window.location.search);
+    const isStopMode = (urlParams.get('mode') === 'stop');
+
+    // 画面が読み込まれた瞬間に実行
+    window.onload = function() {
+        if (isStopMode) {
+            document.getElementById('normalScheduleBox').style.display = 'none'; // 通常枠を消す
+            document.getElementById('stopAlertBox').style.display = 'block';     // 警告を出す
+        }
+        calculate();
+    }
 
     function changeQty(type, val) {
         const checkbox = document.getElementById(type + 'Check');
@@ -338,7 +362,15 @@
         });
 
         document.getElementById('totalDisplay').innerText = total.toLocaleString() + " 円";
-        submitBtn.disabled = false;
+
+        // 【最重要】もし依頼停止モード（stop）なら、項目を選んでも絶対にボタンをONにしない！
+        if (isStopMode) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = "ORDERS CURRENTLY CLOSED";
+        } else {
+            submitBtn.disabled = false;
+            submitBtn.innerText = "PROCEED TO HEARING";
+        }
     }
 </script>
 </body>
