@@ -3,279 +3,417 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>【管理デスク】busuzimayako85 OFFICIAL SITE</title>
+    <title>busuzimayako85 OFFICIAL ORDER SITE</title>
     <style>
-        /* 全体のベース設定（表画面と統一） */
+        /* 全体のベース設定（パンク・ダークモード） */
         body {
             background-color: #0b0b0b;
             color: #f0f0f0;
             font-family: 'Impact', 'Arial Black', 'Hiragino Kaku Gothic ProN', sans-serif;
             margin: 0;
-            padding: 40px 20px;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ─── 画面左側：固定看板エリア ─── */
+        .left-panel {
+            width: 40%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            background: #000000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-right: 4px solid #ff0055;
+            box-sizing: border-box;
+            padding: 4px;
+        }
+
+        .logo-area {
+            width: 80%;
+            max-width: 350px;
+            aspect-ratio: 1;
+            background: #111;
+            border: 2px dashed #7cfc00;
             display: flex;
             justify-content: center;
+            align-items: center;
+            color: #555;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.2);
         }
 
-        .admin-container {
-            width: 100%;
-            max-width: 900px;
-            background: #000000;
-            border: 2px solid #ff0055; /* 鮮烈な赤の枠線 */
-            box-shadow: 0 0 30px rgba(255, 0, 85, 0.15);
-            padding: 40px;
+        .info-text {
+            color: #7cfc00;
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px rgba(124, 252, 0, 0.5);
+            margin-bottom: 10px;
+        }
+
+        /* ─── 画面右側：メインコンテンツ ─── */
+        .right-panel {
+            width: 60%;
+            margin-left: 40%;
+            padding: 50px;
             box-sizing: border-box;
         }
 
-        h1 {
-            font-size: 32px;
-            color: #ffffff;
-            letter-spacing: 2px;
-            margin-top: 0;
-            margin-bottom: 10px;
-            border-bottom: 3px double #ff0055;
-            padding-bottom: 15px;
-            text-align: center;
+        /* イラストごとのカード枠 */
+        .illustration-card {
+            background: #111;
+            border: 1px solid #222;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 6px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
-        h2 {
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #ff0055;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+
+        .card-title {
             font-size: 20px;
             color: #ffffff;
-            border-left: 6px solid #7cfc00; /* ネオン黄緑のアクセント */
-            padding-left: 12px;
-            margin-top: 40px;
-            margin-bottom: 20px;
+            margin: 0;
             letter-spacing: 1px;
         }
 
-        .section {
-            background: #111111;
-            border: 1px solid #222;
-            padding: 25px;
-            border-radius: 4px;
-            margin-bottom: 30px;
-        }
-
-        /* スケジュール管理のスタイル */
-        .tmpl-container {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-        }
-
-        .tmpl-btn {
-            background: #161616;
-            color: #888;
-            border: 1px solid #333;
-            padding: 10px 15px;
+        .remove-card-btn {
+            background: none;
+            border: 1px solid #ff0055;
+            color: #ff0055;
             cursor: pointer;
-            border-radius: 4px;
-            font-size: 14px;
-            transition: all 0.2s ease;
-        }
-
-        .tmpl-btn:hover {
-            background: #222;
-            border-color: #7cfc00;
-            color: #7cfc00;
-            text-shadow: 0 0 5px rgba(124, 252, 0, 0.5);
-        }
-
-        .input-text {
-            width: 100%;
-            padding: 15px;
-            background: #000000;
-            color: #7cfc00;
-            border: 1px solid #333;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 16px;
-            margin-top: 5px;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-
-        .input-text:focus {
-            outline: none;
-            border-color: #ff0055;
-            box-shadow: 0 0 10px rgba(255, 0, 85, 0.3);
-        }
-
-        .save-btn {
-            width: 100%;
-            background: #ff0055;
-            color: white;
-            border: none;
-            padding: 15px;
-            font-size: 16px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            cursor: pointer;
-            box-shadow: 0 4px 0 #b3003b;
-        }
-
-        .save-btn:hover {
-            background: #ff266f;
-            box-shadow: 0 0 15px rgba(255, 0, 85, 0.5);
-        }
-
-        /* 依頼一覧のスタイル */
-        .order-card {
-            background: #080808;
-            border: 1px solid #222;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-            position: relative;
-        }
-
-        .status-badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 6px 12px;
-            border-radius: 2px;
-            font-weight: bold;
+            padding: 5px 10px;
             font-size: 12px;
+            font-weight: bold;
+        }
+        .remove-card-btn:hover { background: #ff0055; color: #fff; }
+
+        .section-title {
+            font-size: 16px;
+            color: #7cfc00;
+            margin-top: 25px;
+            margin-bottom: 12px;
             letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
-        .status-hearing { background: #7cfc00; color: #000; box-shadow: 0 0 10px rgba(124, 252, 0, 0.4); }
-        .status-wait { background: #ffea00; color: #000; }
-        .status-complete { background: #ff0055; color: #fff; box-shadow: 0 0 10px rgba(255, 0, 85, 0.4); }
+        /* 未選択時のロック用カバー */
+        .options-wrapper { position: relative; }
+        .options-wrapper.locked { opacity: 0.2; pointer-events: none; user-select: none; }
 
-        .order-title {
-            font-size: 18px;
-            color: #fff;
-            display: block;
-            margin-bottom: 15px;
-        }
+        /* スケジュール案内・アラート */
+        .schedule-box { background: #151515; border: 1px solid #333; padding: 20px; border-radius: 4px; margin-bottom: 30px; }
+        .stop-alert-box { display: none; background: #2a0000; border: 2px solid #ff0000; color: #ff3333; padding: 15px; border-radius: 4px; margin-bottom: 30px; font-weight: bold; text-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
 
-        .detail-list {
-            background: #111;
+        /* 選択項目のスタイル */
+        .form-group { margin-bottom: 10px; }
+        label { display: flex; align-items: center; cursor: pointer; padding: 12px 15px; background: #161616; border-radius: 4px; border: 1px solid #222; font-size: 14px; }
+        label:hover { background: #222; border-color: #ff0055; }
+        input[type="radio"]:checked + span, input[type="checkbox"]:checked + span { color: #7cfc00; text-shadow: 0 0 8px rgba(124, 252, 0, 0.6); }
+        .price-text { margin-left: auto; color: #888; font-weight: bold; }
+
+        /* 数量コントロール */
+        .qty-container { display: flex; align-items: center; margin-top: 8px; padding-left: 30px; }
+        .qty-btn { background: #222; color: #fff; border: 1px solid #444; width: 28px; height: 28px; cursor: pointer; font-weight: bold; }
+        .qty-btn:hover { background: #ff0055; border-color: #ff0055; }
+        .qty-input { width: 40px; text-align: center; background: #000; color: #7cfc00; border: 1px solid #333; height: 26px; font-size: 14px; }
+
+        /* ボタンデザイン */
+        .add-card-btn {
+            width: 100%;
+            background: #000;
+            color: #7cfc00;
+            border: 2px dashed #7cfc00;
             padding: 15px;
-            border-radius: 4px;
-            font-size: 14px;
-            color: #aaa;
-            line-height: 1.8;
-            border-left: 3px solid #ff0055;
-        }
-
-        .action-area {
-            margin-top: 20px;
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        select {
-            background: #161616;
-            color: #fff;
-            padding: 12px 20px;
-            border: 1px solid #333;
-            border-radius: 4px;
-            font-size: 14px;
+            font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
+            margin-top: 10px;
+            letter-spacing: 1px;
+            transition: all 0.2s;
         }
+        .add-card-btn:hover { background: #7cfc00; color: #000; box-shadow: 0 0 15px rgba(124, 252, 0, 0.4); }
+        .add-card-btn:disabled { opacity: 0.3; cursor: not-allowed; background: none !important; color: #444 !important; border-color: #444 !important; box-shadow: none !important; }
 
-        select:focus {
-            border-color: #ff0055;
-            outline: none;
+        /* 金額表示ボックス（割引表示付きにパワーアップ） */
+        .total-box {
+            margin-top: 40px;
+            padding: 30px;
+            background: #1a0007;
+            border: 2px solid #ff0055;
+            border-radius: 4px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
+        }
+        .subtotal-text { font-size: 14px; color: #888; margin-bottom: 5px; }
+        .discount-text { font-size: 15px; color: #7cfc00; font-weight: bold; margin-bottom: 15px; text-shadow: 0 0 5px rgba(124, 252, 0, 0.5); }
+        .total-price { font-size: 42px; font-weight: bold; color: #ff0055; text-shadow: 0 0 15px rgba(255, 0, 85, 0.8); }
+        
+        .submit-btn { width: 100%; background: #ff0055; color: white; border: none; padding: 20px; font-size: 20px; font-weight: bold; letter-spacing: 2px; cursor: pointer; margin-top: 25px; box-shadow: 0 4px 0 #b3003b; }
+        .submit-btn:hover { background: #ff266f; box-shadow: 0 0 15px rgba(255, 0, 85, 0.6); }
+        .submit-btn:disabled { background: #222 !important; color: #555 !important; box-shadow: none !important; cursor: not-allowed !important; }
+
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            .left-panel { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 4px solid #ff0055; padding: 40px 20px; }
+            .right-panel { width: 100%; margin-left: 0; padding: 20px; }
         }
     </style>
 </head>
 <body>
 
-<div class="admin-container">
-    <h1>busuzimayako85 CONTROL DESK</h1>
-
-    <!-- スケジュール管理 -->
-    <div class="section">
-        <h2>01. UPDATE SYSTEM NOTICE (受付状況の更新)</h2>
-        <div style="margin-bottom: 15px;">
-            <small style="color: #666; font-size: 12px;">テンプレートを選択して文字を書き換えてください：</small>
+    <!-- 左側：ブランド看板エリア -->
+    <div class="left-panel">
+        <div class="logo-area">
+            <p style="padding: 20px; font-size: 14px;">[ ここにロゴ画像 <br>image_64c9bf.jpg が<br>大きく表示されます ]</p>
         </div>
-        <div class="tmpl-container">
-            <button class="tmpl-btn" onclick="useTemplate('現在【○月以降】受付中（残り●枠）')">TEMPLATE A (受付中)</button>
-            <button class="tmpl-btn" onclick="useTemplate('依頼停止中（○月再開予定）')">TEMPLATE B (再開予定)</button>
-            <button class="tmpl-btn" onclick="useTemplate('依頼停止中（再開未定）')">TEMPLATE C (未定)</button>
-        </div>
-        <input type="text" id="scheduleInput" class="input-text" value="現在【7月以降】受付中（残り2枠）">
-        <button class="save-btn" onclick="updateSchedule()">LAUNCH TO LIVE SITE (表画面に反映)</button>
+        <div class="info-text">busuzimayako85</div>
+        <div style="font-size: 12px; color: #666;">ILLUSTRATION ONLINE ORDER SYSTEM</div>
     </div>
 
-    <!-- 依頼一覧・進行ステータス管理 -->
-    <div class="section">
-        <h2>02. ACTIVE ORDERS (進行中のオーダー一覧)</h2>
+    <!-- 右側：メイン操作エリア -->
+    <div class="right-panel">
+        <h1 style="margin-top: 0; font-size: 32px; letter-spacing: 2px;">ORDER & ESTIMATION</h1>
         
-        <div class="order-card">
-            <span class="status-badge status-hearing" id="statusLabel1">HEARING</span>
-            <span class="order-title">ORDER: #0024 <span style="color: #666; font-size: 14px;">(Client: Guest_A)</span></span>
-            
-            <div class="detail-list">
-                ・BASE: バストアップ (11,000円) <br>
-                ・BACKGROUND: 簡易背景 (+2,000円) <br>
-                ・OPTION: 表情差分 × 1 (+500円) <br>
-                <strong style="color: #7cfc00;">💰 TOTAL ESTIMATE: 13,500円</strong>
-            </div>
-            
-            <div class="action-area">
-                <span style="font-size: 14px; color: #888;">STATUS:</span>
-                <select id="statusSelect1" onchange="changeStatus(1)">
-                    <option value="hearing" selected>ヒアリング中</option>
-                    <option value="wait">入金待ち (請求を出す)</option>
-                    <option value="complete">納品完了</option>
-                </select>
-                <input type="text" id="gigaUrl1" class="input-text" style="margin:0; width: 280px; display:none;" placeholder="GigaFile便のURLを入力">
-                <button class="save-btn" id="sendBtn1" style="margin:0; width: auto; padding: 12px 25px; display:none;" onclick="sendGigaUrl(1)">SEND & CLOSE</button>
-            </div>
+        <div class="schedule-box" id="normalScheduleBox">
+            <span style="color: #ff0055; font-weight: bold;">【NOTICE】</span> 
+            <span id="currentSchedule">現在【7月以降】受付中（残り2枠）</span>
         </div>
+
+        <div class="stop-alert-box" id="stopAlertBox">
+            ⚠️ 【只今、新規のご依頼を停止しております】<br>
+            現在、お見積もりのシミュレーションのみご利用いただけます。再開まで今しばらくお待ちください。
+        </div>
+
+        <form id="orderForm">
+            <div id="illustrationContainer"></div>
+
+            <button type="button" id="addCardBtn" class="add-card-btn" onclick="addNewCard()">+ ADD ANOTHER ILLUSTRATION (枚数を追加する)</button>
+
+            <!-- パワーアップした合計金額ボックス -->
+            <div class="total-box">
+                <div class="subtotal-text" id="subtotalWrapper" style="display:none;">SUBTOTAL (小計): <span id="subtotalDisplay">0 円</span></div>
+                <div class="discount-text" id="discountWrapper" style="display:none;">MULTIPLE DISCOUNT (<span id="discountPercent">0</span>% OFF): -<span id="discountDisplay">0 円</span></div>
+                <div style="font-size: 13px; letter-spacing: 1px; color: #aaa;">ESTIMATED TOTAL (最終合計金額)</div>
+                <div class="total-price" id="totalDisplay">0 円</div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="submit-btn" disabled>PROCEED TO HEARING</button>
+        </form>
     </div>
-</div>
 
 <script>
-    function useTemplate(text) {
-        document.getElementById('scheduleInput').value = text;
-    }
+    const PRICES = {
+        base: { face: 9000, bust: 11000, full: 12000 },
+        bg: { none: 0, simple: 2000, custom: 3000, random: 6000 },
+        diff: { faceDiff: 500, poseDiff: 700, clothDiff: 1000 }
+    };
 
-    function updateSchedule() {
-        const val = document.getElementById('scheduleInput').value;
-        alert("表画面のスケジュールを「" + val + "」に更新しました！");
-    }
+    let cardCount = 0;
+    const urlParams = new URLSearchParams(window.location.search);
+    const isStopMode = (urlParams.get('mode') === 'stop');
 
-    function changeStatus(id) {
-        const select = document.getElementById('statusSelect' + id).value;
-        const label = document.getElementById('statusLabel' + id);
-        const urlInput = document.getElementById('gigaUrl' + id);
-        const sendBtn = document.getElementById('sendBtn' + id);
-
-        if (select === 'hearing') {
-            label.className = "status-badge status-hearing";
-            label.innerText = "HEARING";
-            urlInput.style.display = "none";
-            sendBtn.style.display = "none";
-        } else if (select === 'wait') {
-            label.className = "status-badge status-wait";
-            label.innerText = "WAITING PAYMENT";
-            urlInput.style.display = "none";
-            sendBtn.style.display = "none";
-            alert("クライアント画面に振込案内と『入金待ち』ステータスを表示しました。");
-        } else if (select === 'complete') {
-            urlInput.style.display = "inline-block";
-            sendBtn.style.display = "inline-block";
+    window.onload = function() {
+        if (isStopMode) {
+            document.getElementById('normalScheduleBox').style.display = 'none';
+            document.getElementById('stopAlertBox').style.display = 'block';
         }
+        addNewCard();
     }
 
-    function sendGigaUrl(id) {
-        const url = document.getElementById('gigaUrl' + id).value;
-        if(!url) { alert("ギガファイル便のURLを入力してください"); return; }
+    function addNewCard() {
+        cardCount++;
+        const container = document.getElementById('illustrationContainer');
         
-        const label = document.getElementById('statusLabel' + id);
-        label.className = "status-badge status-complete";
-        label.innerText = "COMPLETED";
+        const cardHtml = `
+            <div class="illustration-card" id="card_${cardCount}">
+                <div class="card-header">
+                    <h3 class="card-title">ILLUSTRATION #${cardCount} (${cardCount}枚目)</h3>
+                    ${cardCount > 1 ? `<button type="button" class="remove-card-btn" onclick="removeCard(${cardCount})">REMOVE (削除)</button>` : ''}
+                </div>
+
+                <div class="section-title">01. SELECT BASE TYPE (必須)</div>
+                <div class="form-group">
+                    <label><input type="radio" name="base_${cardCount}" value="face" onchange="onBaseSelect(${cardCount})"> <span>フェイスアップ</span> <span class="price-text">9,000円</span></label>
+                </div>
+                <div class="form-group">
+                    <label><input type="radio" name="base_${cardCount}" value="bust" onchange="onBaseSelect(${cardCount})"> <span>バストアップ</span> <span class="price-text">11,000円</span></label>
+                </div>
+                <div class="form-group">
+                    <label><input type="radio" name="base_${cardCount}" value="full" onchange="onBaseSelect(${cardCount})"> <span>全身</span> <span class="price-text">12,000円</span></label>
+                </div>
+
+                <div class="options-wrapper locked" id="optionsWrapper_${cardCount}">
+                    <div class="section-title">02. BACKGROUND OPTIONS (任意)</div>
+                    <div class="form-group">
+                        <label><input type="radio" name="bg_${cardCount}" value="none" checked onchange="calculate()"> <span>背景なし (単色/透過/グラデ)</span> <span class="price-text">+0円</span></label>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="radio" name="bg_${cardCount}" value="simple" onchange="calculate()"> <span>簡易背景 (パターン/エフェクト)</span> <span class="price-text">+2,000円</span></label>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="radio" name="bg_${cardCount}" value="custom" onchange="calculate()"> <span>しっかり背景: 構図指定あり</span> <span class="price-text">+3,000円</span></label>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="radio" name="bg_${cardCount}" value="random" onchange="calculate()"> <span>しっかり背景: おまかせ (構図考案料込)</span> <span class="price-text">+6,000円</span></label>
+                    </div>
+
+                    <div class="section-title">03. ADDITIONAL OPTIONS (任意)</div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="faceDiffCheck_${cardCount}" onchange="toggleQty(${cardCount}, 'faceDiff')"> <span>表情差分</span> <span class="price-text">+500円 / 枚</span></label>
+                        <div class="qty-container">
+                            <button type="button" class="qty-btn" onclick="changeQty(${cardCount}, 'faceDiff', -1)">-</button>
+                            <input type="text" id="faceDiffQty_${cardCount}" class="qty-input" value="0" readonly>
+                            <button type="button" class="qty-btn" onclick="changeQty(${cardCount}, 'faceDiff', 1)">+</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="poseDiffCheck_${cardCount}" onchange="toggleQty(${cardCount}, 'poseDiff')"> <span>ポーズ差分</span> <span class="price-text">+700円 / 枚</span></label>
+                        <div class="qty-container">
+                            <button type="button" class="qty-btn" onclick="changeQty(${cardCount}, 'poseDiff', -1)">-</button>
+                            <input type="text" id="poseDiffQty_${cardCount}" class="qty-input" value="0" readonly>
+                            <button type="button" class="qty-btn" onclick="changeQty(${cardCount}, 'poseDiff', 1)">+</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="clothDiffCheck_${cardCount}" onchange="toggleQty(${cardCount}, 'clothDiff')"> <span>服装差分</span> <span class="price-text">+1,000円 / 枚</span></label>
+                        <div class="qty-container">
+                            <button type="button" class="qty-btn" onclick="changeQty(${cardCount}, 'clothDiff', -1)">-</button>
+                            <input type="text" id="clothDiffQty_${cardCount}" class="qty-input" value="0" readonly>
+                            <button type="button" class="qty-btn" onclick="changeQty(${cardCount}, 'clothDiff', 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
         
-        alert("ギガファイル便のURL（" + url + "）をチャットへ送信し、ステータスを【納品完了】にしました！");
+        container.insertAdjacentHTML('beforeend', cardHtml);
+        calculate();
+    }
+
+    function removeCard(id) {
+        const card = document.getElementById(`card_${id}`);
+        if (card) card.remove();
+        calculate();
+    }
+
+    function onBaseSelect(id) {
+        const wrapper = document.getElementById(`optionsWrapper_${id}`);
+        if (wrapper) { wrapper.classList.remove('locked'); }
+        calculate();
+    }
+
+    function changeQty(id, type, val) {
+        const checkbox = document.getElementById(`${type}Check_${id}`);
+        if (!checkbox.checked) return;
+        const input = document.getElementById(`${type}Qty_${id}`);
+        let current = parseInt(input.value) + val;
+        if (current < 0) current = 0;
+        input.value = current;
+        calculate();
+    }
+
+    function toggleQty(id, type) {
+        const checkbox = document.getElementById(`${type}Check_${id}`);
+        const input = document.getElementById(`${type}Qty_${id}`);
+        if (!checkbox.checked) { input.value = 0; } 
+        else if (input.value == 0) { input.value = 1; }
+        calculate();
+    }
+
+    function calculate() {
+        const form = document.getElementById('orderForm');
+        let rawSubtotal = 0; // 割引前の小計
+        let activeCardCount = 0; // ベースが選択されているイラストの枚数
+        let allBasesSelected = true;
+
+        const cards = document.querySelectorAll('.illustration-card');
+        if (cards.length === 0) { allBasesSelected = false; }
+
+        cards.forEach(card => {
+            const id = card.id.split('_')[1];
+            const baseRadio = form.elements[`base_${id}`].value;
+            const bgRadio = form.elements[`bg_${id}`] ? form.elements[`bg_${id}`].value : 'none';
+
+            if (!baseRadio) {
+                allBasesSelected = false;
+                return; 
+            }
+
+            activeCardCount++;
+            rawSubtotal += PRICES.base[baseRadio];
+            rawSubtotal += PRICES.bg[bgRadio];
+
+            ['faceDiff', 'poseDiff', 'clothDiff'].forEach(type => {
+                const checkbox = document.getElementById(`${type}Check_${id}`);
+                const qtyInput = document.getElementById(`${type}Qty_${id}`);
+                if (checkbox && checkbox.checked && qtyInput) {
+                    rawSubtotal += PRICES.diff[type] * parseInt(qtyInput.value);
+                }
+            });
+        });
+
+        // ─── 複数枚割引の判定ロジック ───
+        let discountRate = 0; 
+        if (activeCardCount === 2) {
+            discountRate = 0.05; // 2枚で 5% OFF
+        } else if (activeCardCount >= 3) {
+            discountRate = 0.10; // 3枚以上で 10% OFF
+        }
+
+        const discountAmount = Math.floor(rawSubtotal * discountRate); // 割引額（端数切り捨て）
+        const finalTotal = rawSubtotal - discountAmount; // 最終合計金額
+
+        // 表示のコントロール
+        const subtotalWrapper = document.getElementById('subtotalWrapper');
+        const discountWrapper = document.getElementById('discountWrapper');
+
+        if (discountRate > 0 && rawSubtotal > 0) {
+            // 割引がある時だけ、小計と割引額の行を表示する
+            subtotalWrapper.style.display = 'block';
+            discountWrapper.style.display = 'block';
+            document.getElementById('subtotalDisplay').innerText = rawSubtotal.toLocaleString() + " 円";
+            document.getElementById('discountPercent').innerText = (discountRate * 100).toString();
+            document.getElementById('discountDisplay').innerText = discountAmount.toLocaleString() + " 円";
+        } else {
+            // 1枚の時はすっきりさせるために非表示
+            subtotalWrapper.style.display = 'none';
+            discountWrapper.style.display = 'none';
+        }
+
+        // 最終合計金額の表示更新
+        document.getElementById('totalDisplay').innerText = finalTotal.toLocaleString() + " 円";
+
+        // 枚数追加ボタンと送信ボタンの制御
+        document.getElementById('addCardBtn').disabled = !allBasesSelected;
+        const submitBtn = document.getElementById('submitBtn');
+        
+        if (isStopMode) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = "ORDERS CURRENTLY CLOSED";
+        } else {
+            if (allBasesSelected && finalTotal > 0) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "PROCEED TO HEARING";
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.innerText = "SELECT BASE TYPE TO PROCEED";
+            }
+        }
     }
 </script>
 </body>
