@@ -149,7 +149,7 @@
         .add-card-btn:hover { background: #7cfc00; color: #000; box-shadow: 0 0 15px rgba(124, 252, 0, 0.4); }
         .add-card-btn:disabled { opacity: 0.3; cursor: not-allowed; background: none !important; color: #444 !important; border-color: #444 !important; box-shadow: none !important; }
 
-        /* 金額表示ボックス（割引表示付きにパワーアップ） */
+        /* 金額表示ボックス */
         .total-box {
             margin-top: 40px;
             padding: 30px;
@@ -176,7 +176,6 @@
 </head>
 <body>
 
-    <!-- 左側：ブランド看板エリア -->
     <div class="left-panel">
         <div class="logo-area">
             <p style="padding: 20px; font-size: 14px;">[ ここにロゴ画像 <br>image_64c9bf.jpg が<br>大きく表示されます ]</p>
@@ -185,7 +184,6 @@
         <div style="font-size: 12px; color: #666;">ILLUSTRATION ONLINE ORDER SYSTEM</div>
     </div>
 
-    <!-- 右側：メイン操作エリア -->
     <div class="right-panel">
         <h1 style="margin-top: 0; font-size: 32px; letter-spacing: 2px;">ORDER & ESTIMATION</h1>
         
@@ -199,12 +197,11 @@
             現在、お見積もりのシミュレーションのみご利用いただけます。再開まで今しばらくお待ちください。
         </div>
 
-        <form id="orderForm">
+        <form id="orderForm" onsubmit="goToConfirmPage(event)">
             <div id="illustrationContainer"></div>
 
             <button type="button" id="addCardBtn" class="add-card-btn" onclick="addNewCard()">+ ADD ANOTHER ILLUSTRATION (枚数を追加する)</button>
 
-            <!-- パワーアップした合計金額ボックス -->
             <div class="total-box">
                 <div class="subtotal-text" id="subtotalWrapper" style="display:none;">SUBTOTAL (小計): <span id="subtotalDisplay">0 円</span></div>
                 <div class="discount-text" id="discountWrapper" style="display:none;">MULTIPLE DISCOUNT (<span id="discountPercent">0</span>% OFF): -<span id="discountDisplay">0 円</span></div>
@@ -212,7 +209,7 @@
                 <div class="total-price" id="totalDisplay">0 円</div>
             </div>
 
-            <button type="submit" id="submitBtn" class="submit-btn" disabled>PROCEED TO HEARING</button>
+            <button type="submit" id="submitBtn" class="submit-btn" disabled>SEND ESTIMATION FOR CONSULTATION</button>
         </form>
     </div>
 
@@ -249,17 +246,14 @@
         let isStopMode = (urlParams.get('mode') === 'stop');
 
         try {
-            // 管理画面で保存した settings/schedule ドキュメントを読み込みます
             const docRef = doc(db, "settings", "schedule");
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                // スケジュールの文字を書き換え
                 if (data.text) {
                     document.getElementById('currentSchedule').innerText = data.text;
                 }
-                // 受付モード（通常 or 停止）を管理画面の設定に切り替え
                 if (data.mode) {
                     isStopMode = (data.mode === 'stop');
                 }
@@ -381,10 +375,53 @@
         calculate();
     }
 
+    // ─── 【重要】確認画面へデータを引き継いで移動する関数 ───
+    window.goToConfirmPage = function(event) {
+        event.preventDefault(); // ページが勝手にリロードされるのを防ぐ
+
+        const form = document.getElementById('orderForm');
+        const cardsData = [];
+        const cards = document.querySelectorAll('.illustration-card');
+
+        // 現在選択されている内容を1枚ずつ収集する
+        cards.forEach(card => {
+            const id = card.id.split('_')[1];
+            const baseRadio = form.elements[`base_${id}`].value;
+            const bgRadio = form.elements[`bg_${id}`] ? form.elements[`bg_${id}`].value : 'none';
+            const faceDiff = parseInt(document.getElementById(`faceDiffQty_${id}`).value) || 0;
+            const poseDiff = parseInt(document.getElementById(`poseDiffQty_${id}`).value) || 0;
+            const clothDiff = parseInt(document.getElementById(`clothDiffQty_${id}`).value) || 0;
+
+            cardsData.push({
+                base: baseRadio,
+                bg: bgRadio,
+                faceDiff: faceDiff,
+                poseDiff: poseDiff,
+                clothDiff: clothDiff
+            });
+        });
+
+        // 割引などの金額計算結果をまとめてオブジェクトにする
+        const estimateSummary = {
+            cards: cardsData,
+            rawSubtotal: window.lastCalculatedRawSubtotal,
+            discountRate: window.lastCalculatedDiscountRate,
+            discountPercent: window.lastCalculatedDiscountPercent,
+            discountAmount: window.lastCalculatedDiscountAmount,
+            finalTotal: window.lastCalculatedFinalTotal
+        };
+
+        // ブラウザの一時メモリ（LocalStorage）に保存
+        localStorage.setItem('currentEstimate', JSON.stringify(estimateSummary));
+
+        // 確認画面（confirm.html）へジャンプ！
+        window.location.href = 'confirm.html';
+    };
+
     function calculate() {
         const form = document.getElementById('orderForm');
-        let rawSubtotal = 0; // 割引前の小計
-        let activeCardCount = 0; // ベースが選択されているイラストの枚数
+        let rawSubtotal = 0; 
+        let activeCardCount = 0; 
         let allBasesSelected = true;
 
         const cards = document.querySelectorAll('.illustration-card');
@@ -413,48 +450,49 @@
             });
         });
 
-        // ─── 複数枚割引の判定ロジック ───
         let discountRate = 0; 
         if (activeCardCount === 2) {
-            discountRate = 0.05; // 2枚で 5% OFF
+            discountRate = 0.05; 
         } else if (activeCardCount >= 3) {
-            discountRate = 0.10; // 3枚以上で 10% OFF
+            discountRate = 0.10; 
         }
 
-        const discountAmount = Math.floor(rawSubtotal * discountRate); // 割引額（端数切り捨て）
-        const finalTotal = rawSubtotal - discountAmount; // 最終合計金額
+        const discountAmount = Math.floor(rawSubtotal * discountRate); 
+        const finalTotal = rawSubtotal - discountAmount; 
 
-        // 表示のコントロール
+        // データを移動用関数でも使えるようにwindowオブジェクトにキープしておく
+        window.lastCalculatedRawSubtotal = rawSubtotal;
+        window.lastCalculatedDiscountRate = discountRate;
+        window.lastCalculatedDiscountPercent = (discountRate * 100);
+        window.lastCalculatedDiscountAmount = discountAmount;
+        window.lastCalculatedFinalTotal = finalTotal;
+
         const subtotalWrapper = document.getElementById('subtotalWrapper');
         const discountWrapper = document.getElementById('discountWrapper');
 
         if (discountRate > 0 && rawSubtotal > 0) {
-            // 割引がある時だけ、小計と割引額の行を表示する
             subtotalWrapper.style.display = 'block';
             discountWrapper.style.display = 'block';
             document.getElementById('subtotalDisplay').innerText = rawSubtotal.toLocaleString() + " 円";
             document.getElementById('discountPercent').innerText = (discountRate * 100).toString();
             document.getElementById('discountDisplay').innerText = discountAmount.toLocaleString() + " 円";
         } else {
-            // 1枚の時はすっきりさせるために非表示
             subtotalWrapper.style.display = 'none';
             discountWrapper.style.display = 'none';
         }
 
-        // 最終合計金額の表示更新
         document.getElementById('totalDisplay').innerText = finalTotal.toLocaleString() + " 円";
 
-        // 枚数追加ボタンと送信ボタンの制御
         document.getElementById('addCardBtn').disabled = !allBasesSelected;
         const submitBtn = document.getElementById('submitBtn');
         
-        if (isStopMode) {
+        if (window.currentSiteModeIsStop) {
             submitBtn.disabled = true;
             submitBtn.innerText = "ORDERS CURRENTLY CLOSED";
         } else {
             if (allBasesSelected && finalTotal > 0) {
                 submitBtn.disabled = false;
-                submitBtn.innerText = "PROCEED TO HEARING";
+                submitBtn.innerText = "SEND ESTIMATION FOR CONSULTATION";
             } else {
                 submitBtn.disabled = true;
                 submitBtn.innerText = "SELECT BASE TYPE TO PROCEED";
@@ -462,15 +500,12 @@
         }
     }
 
-    // Firebase（module）の仕様で関数が外から見えなくなるのを防ぐため、
-    // ボタンの onclick 等から呼び出せるようにグローバルに公開します。
     window.addNewCard = addNewCard;
     window.removeCard = removeCard;
     window.onBaseSelect = onBaseSelect;
     window.changeQty = changeQty;
     window.toggleQty = toggleQty;
     window.calculate = calculate;
-    
 </script>
 </body>
 </html>
