@@ -155,4 +155,58 @@
     </div>
 
     <div class="form-section">
-        <div class="input
+        <div class="input-group">
+            <span class="input-label">YOUR NAME (お名前 / ニックネーム可)</span>
+            <input type="text" id="clientName" class="input-field" placeholder="例: 毒島太郎">
+        </div>
+        <div class="input-group">
+            <span class="input-label">CONTACT INFO (ご連絡先: XのID、各種SNS、メールなど)</span>
+            <input type="text" id="clientContact" class="input-field" placeholder="例: X @busuzimayako85">
+        </div>
+
+        <button type="button" class="action-btn" id="submitBtn">SEND CONSULTATION (この内容で相談する)</button>
+        <a href="index.html" class="back-link">← 見積もりをやり直す</a>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+    // Firebase接続設定
+    const firebaseConfig = {
+        apiKey: "AIzaSyDi4twz34suKR2KXztm19FbUF-dtJN4OQU",
+        authDomain: "busuzimayako85-order.firebaseapp.com",
+        projectId: "busuzimayako85-order",
+        storageBucket: "busuzimayako85-order.firebasestorage.app",
+        messagingSenderId: "921095725285",
+        appId: "1:921095725285:web:d65f6accf6ddb28765f40c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // ─── 【ここを修正】ページ読み込み時の処理を確実にする ───
+    function initConfirmPage() {
+        const estimateDataString = localStorage.getItem('currentEstimate');
+        if (!estimateDataString) {
+            alert('見積もりデータが見つかりません。TOP画面からやり直してください。');
+            window.location.href = 'index.html';
+            return;
+        }
+
+        const data = JSON.parse(estimateDataString);
+        
+        // 金額の表示
+        document.getElementById('finalTotalDisplay').innerText = data.finalTotal.toLocaleString() + " 円";
+
+        // 選択された内訳テキストの作成
+        const summaryList = document.getElementById('summaryList');
+        summaryList.innerHTML = ''; // クリア
+
+        // 各イラストカードの内訳を表示
+        data.cards.forEach((card, index) => {
+            const row = document.createElement('div');
+            row.className = 'item-row';
+            
+            let baseName = card.base
