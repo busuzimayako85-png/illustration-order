@@ -52,6 +52,7 @@
             padding: 10px 0;
             border-bottom: 1px dashed #333;
             font-size: 14px;
+            color: #e0e0e0;
         }
         .item-row:last-child { border-bottom: none; }
 
@@ -169,6 +170,67 @@
     </div>
 </div>
 
+<script>
+    // ─── 【重要】読み込み処理を script type="module" の外側に出して確実に実行させる ───
+    function initConfirmPage() {
+        const estimateDataString = localStorage.getItem('currentEstimate');
+        if (!estimateDataString) {
+            // ローカル環境でのテスト用に、データが空だった場合のダミーデータを表示
+            document.getElementById('finalTotalDisplay').innerText = "24,000 円";
+            document.getElementById('summaryList').innerHTML = `
+                <div class="item-row">🎨 <span style="color:#fff;">ILLUSTRATION #1</span> : バストアップ ＋ 簡易背景</div>
+                <div class="item-row" style="color:#666; font-size:12px; border-bottom:none;">※ローカル環境のため、モックデータを表示しています。テスト送信は可能です。</div>
+            `;
+            return;
+        }
+
+        try {
+            const data = JSON.parse(estimateDataString);
+            
+            // 金額の表示
+            document.getElementById('finalTotalDisplay').innerText = data.finalTotal.toLocaleString() + " 円";
+
+            // 選択された内訳テキストの作成
+            const summaryList = document.getElementById('summaryList');
+            summaryList.innerHTML = ''; // クリア
+
+            // 各イラストカードの内訳を表示
+            data.cards.forEach((card, index) => {
+                const row = document.createElement('div');
+                row.className = 'item-row';
+                
+                let baseName = card.base === 'face' ? 'フェイスアップ' : card.base === 'bust' ? 'バストアップ' : '全身';
+                let bgName = '背景なし';
+                if(card.bg === 'simple') bgName = '簡易背景';
+                if(card.bg === 'custom') bgName = 'しっかり背景(指定あり)';
+                if(card.bg === 'random') bgName = 'しっかり背景(おまかせ)';
+
+                let diffText = '';
+                if(card.faceDiff > 0) diffText += ` ＋ 表情差分(${card.faceDiff}枚)`;
+                if(card.poseDiff > 0) diffText += ` ＋ ポーズ差分(${card.poseDiff}枚)`;
+                if(card.clothDiff > 0) diffText += ` ＋ 服装差分(${card.clothDiff}枚)`;
+
+                row.innerHTML = `🎨 <span style="color:#fff;">ILLUSTRATION #${index + 1}</span> : ${baseName} ＋ ${bgName}${diffText}`;
+                summaryList.appendChild(row);
+            });
+
+            // 割引がある場合は割引の行も追加
+            if (data.discountAmount > 0) {
+                const discountRow = document.createElement('div');
+                discountRow.className = 'item-row';
+                discountRow.style.color = '#7cfc00';
+                discountRow.innerHTML = `🉐 複数枚割引 (${data.discountPercent}% OFF) : -${data.discountAmount.toLocaleString()} 円`;
+                summaryList.appendChild(discountRow);
+            }
+        } catch(e) {
+            console.error("データ解析エラー:", e);
+        }
+    }
+
+    // 画面が表示されたタイミングで即座に実行
+    document.addEventListener("DOMContentLoaded", initConfirmPage);
+</script>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
@@ -186,27 +248,45 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // ─── 【ここを修正】ページ読み込み時の処理を確実にする ───
-    function initConfirmPage() {
-        const estimateDataString = localStorage.getItem('currentEstimate');
-        if (!estimateDataString) {
-            alert('見積もりデータが見つかりません。TOP画面からやり直してください。');
-            window.location.href = 'index.html';
+    // Firebase(Firestore) へ相談データを送信する処理
+    async function submitConsultation() {
+        const name = document.getElementById('clientName').value.trim();
+        const contact = document.getElementById('clientContact').value.trim();
+
+        if (!name || !contact) {
+            alert('お名前とご連絡先は必須入力です！');
             return;
         }
 
-        const data = JSON.parse(estimateDataString);
-        
-        // 金額の表示
-        document.getElementById('finalTotalDisplay').innerText = data.finalTotal.toLocaleString() + " 円";
+        let estimateData = { cards: [{ base: "bust", bg: "simple", faceDiff: 0, poseDiff: 0, clothDiff: 0 }], finalTotal: 2400 };
+        const estimateDataString = localStorage.getItem('currentEstimate');
+        if (estimateDataString) {
+            estimateData = JSON.parse(estimateDataString);
+        }
 
-        // 選択された内訳テキストの作成
-        const summaryList = document.getElementById('summaryList');
-        summaryList.innerHTML = ''; // クリア
+        try {
+            await addDoc(collection(db, "orders"), {
+                clientName: name,
+                clientContact: contact,
+                details: estimateData.cards,
+                finalTotal: estimateData.finalTotal,
+                status: "未対応",
+                createdAt: new Date()
+            });
 
-        // 各イラストカードの内訳を表示
-        data.cards.forEach((card, index) => {
-            const row = document.createElement('div');
-            row.className = 'item-row';
+            alert('ありがとうございます！相談メッセージが送信されました。毒島からの連絡をお待ちください。');
             
-            let baseName = card.base
+            localStorage.removeItem('currentEstimate');
+            window.location.href = 'index.html';
+
+        } catch (error) {
+            console.error("送信エラー:", error);
+            alert('送信に失敗しました。時間をおいて再度お試しください。: ' + error.message);
+        }
+    }
+
+    // ボタンのクリックイベントを紐付ける
+    document.getElementById('submitBtn').addEventListener('click', submitConsultation);
+</script>
+</body>
+</html>
