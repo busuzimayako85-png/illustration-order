@@ -49,17 +49,18 @@
         }
 
         .item-row {
-            padding: 10px 0;
+            padding: 12px 0;
             border-bottom: 1px dashed #333;
             font-size: 14px;
             color: #e0e0e0;
+            line-height: 1.6;
         }
         .item-row:last-child { border-bottom: none; }
 
-        .price-highlight {
-            color: #7cfc00;
-            text-shadow: 0 0 5px rgba(124, 252, 0, 0.5);
-            font-weight: bold;
+        .bullet-item {
+            display: block;
+            padding-left: 15px;
+            color: #ccc;
         }
 
         /* 合計金額エリア */
@@ -146,15 +147,18 @@
     
     <p style="font-size: 13px; color: #aaa; text-align: center; margin-top: 10px;">ご選択いただいたお見積もりシミュレーションの内容です。</p>
 
+    <!-- 選択内容がここに自動でリストアップされます -->
     <div class="summary-box" id="summaryList">
         <p style="color: #666; text-align: center; font-size: 14px;">読み込み中...</p>
     </div>
 
+    <!-- 最終合計金額 -->
     <div class="total-box">
         <div style="font-size: 12px; color: #aaa; letter-spacing: 1px;">ESTIMATED TOTAL (概算合計金額)</div>
         <div class="total-price" id="finalTotalDisplay">0 円</div>
     </div>
 
+    <!-- 連絡先入力フォーム -->
     <div class="form-section">
         <div class="input-group">
             <span class="input-label">YOUR NAME (お名前 / ニックネーム可)</span>
@@ -171,14 +175,18 @@
 </div>
 
 <script>
-    // ─── 【重要】読み込み処理を script type="module" の外側に出して確実に実行させる ───
+    // ─── 【表示方法の修正】各要素を箇条書きで改行表示させる ───
     function initConfirmPage() {
         const estimateDataString = localStorage.getItem('currentEstimate');
         if (!estimateDataString) {
-            // ローカル環境でのテスト用に、データが空だった場合のダミーデータを表示
+            // ローカル環境でのテスト用にダミーデータを表示
             document.getElementById('finalTotalDisplay').innerText = "24,000 円";
             document.getElementById('summaryList').innerHTML = `
-                <div class="item-row">🎨 <span style="color:#fff;">ILLUSTRATION #1</span> : バストアップ ＋ 簡易背景</div>
+                <div class="item-row">
+                    🎨 <span style="color:#fff;">ILLUSTRATION #1</span> :
+                    <span class="bullet-item">・バストアップ</span>
+                    <span class="bullet-item">・簡易背景</span>
+                </div>
                 <div class="item-row" style="color:#666; font-size:12px; border-bottom:none;">※ローカル環境のため、モックデータを表示しています。テスト送信は可能です。</div>
             `;
             return;
@@ -194,7 +202,7 @@
             const summaryList = document.getElementById('summaryList');
             summaryList.innerHTML = ''; // クリア
 
-            // 各イラストカードの内訳を表示
+            // 各イラストカードの内訳を箇条書きで構築
             data.cards.forEach((card, index) => {
                 const row = document.createElement('div');
                 row.className = 'item-row';
@@ -205,12 +213,18 @@
                 if(card.bg === 'custom') bgName = 'しっかり背景(指定あり)';
                 if(card.bg === 'random') bgName = 'しっかり背景(おまかせ)';
 
-                let diffText = '';
-                if(card.faceDiff > 0) diffText += ` ＋ 表情差分(${card.faceDiff}枚)`;
-                if(card.poseDiff > 0) diffText += ` ＋ ポーズ差分(${card.poseDiff}枚)`;
-                if(card.clothDiff > 0) diffText += ` ＋ 服装差分(${card.clothDiff}枚)`;
+                // タイトル行をセット
+                let contentHtml = `🎨 <span style="color:#fff;">ILLUSTRATION #${index + 1}</span> :`;
+                
+                // 各項目を改行（・）の付きで追加
+                contentHtml += `<span class="bullet-item">・${baseName}</span>`;
+                contentHtml += `<span class="bullet-item">・${bgName}</span>`;
 
-                row.innerHTML = `🎨 <span style="color:#fff;">ILLUSTRATION #${index + 1}</span> : ${baseName} ＋ ${bgName}${diffText}`;
+                if(card.faceDiff > 0) contentHtml += `<span class="bullet-item">・表情差分 (${card.faceDiff}枚)</span>`;
+                if(card.poseDiff > 0) contentHtml += `<span class="bullet-item">・ポーズ差分 (${card.poseDiff}枚)</span>`;
+                if(card.clothDiff > 0) contentHtml += `<span class="bullet-item">・服装差分 (${card.clothDiff}枚)</span>`;
+
+                row.innerHTML = contentHtml;
                 summaryList.appendChild(row);
             });
 
@@ -219,6 +233,8 @@
                 const discountRow = document.createElement('div');
                 discountRow.className = 'item-row';
                 discountRow.style.color = '#7cfc00';
+                discountRow.style.borderTop = '1px solid #333';
+                discountRow.style.marginTop = '10px';
                 discountRow.innerHTML = `🉐 複数枚割引 (${data.discountPercent}% OFF) : -${data.discountAmount.toLocaleString()} 円`;
                 summaryList.appendChild(discountRow);
             }
@@ -227,7 +243,6 @@
         }
     }
 
-    // 画面が表示されたタイミングで即座に実行
     document.addEventListener("DOMContentLoaded", initConfirmPage);
 </script>
 
@@ -285,7 +300,6 @@
         }
     }
 
-    // ボタンのクリックイベントを紐付ける
     document.getElementById('submitBtn').addEventListener('click', submitConsultation);
 </script>
 </body>
