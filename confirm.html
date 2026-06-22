@@ -104,11 +104,18 @@
             border-radius: 4px;
             box-sizing: border-box;
             font-size: 16px;
+            font-family: inherit;
         }
         .input-field:focus {
             border-color: #ff0055;
             outline: none;
             box-shadow: 0 0 10px rgba(255, 0, 85, 0.3);
+        }
+        
+        /* 複数行テキストエリア用の高さ指定 */
+        textarea.input-field {
+            resize: vertical;
+            min-height: 100px;
         }
 
         /* ボタン */
@@ -147,18 +154,15 @@
     
     <p style="font-size: 13px; color: #aaa; text-align: center; margin-top: 10px;">ご選択いただいたお見積もりシミュレーションの内容です。</p>
 
-    <!-- 選択内容がここに自動でリストアップされます -->
     <div class="summary-box" id="summaryList">
         <p style="color: #666; text-align: center; font-size: 14px;">読み込み中...</p>
     </div>
 
-    <!-- 最終合計金額 -->
     <div class="total-box">
         <div style="font-size: 12px; color: #aaa; letter-spacing: 1px;">ESTIMATED TOTAL (概算合計金額)</div>
         <div class="total-price" id="finalTotalDisplay">0 円</div>
     </div>
 
-    <!-- 連絡先入力フォーム -->
     <div class="form-section">
         <div class="input-group">
             <span class="input-label">YOUR NAME (お名前 / ニックネーム可)</span>
@@ -169,13 +173,17 @@
             <input type="text" id="clientContact" class="input-field" placeholder="例: X @busuzimayako85">
         </div>
 
+        <div class="input-group">
+            <span class="input-label">FREE COMMENT (ご質問・ご要望などがあればご自由にどうぞ / 任意)</span>
+            <textarea id="clientComment" class="input-field" placeholder="例: キャラクターの詳細イメージや、希望する納期、ご質問などがあればご記入ください。"></textarea>
+        </div>
+
         <button type="button" class="action-btn" id="submitBtn">SEND CONSULTATION (この内容で相談する)</button>
         <a href="index.html" class="back-link">← 見積もりをやり直す</a>
     </div>
 </div>
 
 <script>
-    // ─── 【表示方法の修正】各要素を箇条書きで改行表示させる ───
     function initConfirmPage() {
         const estimateDataString = localStorage.getItem('currentEstimate');
         if (!estimateDataString) {
@@ -213,10 +221,7 @@
                 if(card.bg === 'custom') bgName = 'しっかり背景(指定あり)';
                 if(card.bg === 'random') bgName = 'しっかり背景(おまかせ)';
 
-                // タイトル行をセット
                 let contentHtml = `🎨 <span style="color:#fff;">ILLUSTRATION #${index + 1}</span> :`;
-                
-                // 各項目を改行（・）の付きで追加
                 contentHtml += `<span class="bullet-item">・${baseName}</span>`;
                 contentHtml += `<span class="bullet-item">・${bgName}</span>`;
 
@@ -267,6 +272,7 @@
     async function submitConsultation() {
         const name = document.getElementById('clientName').value.trim();
         const contact = document.getElementById('clientContact').value.trim();
+        const comment = document.getElementById('clientComment').value.trim(); // ★追加項目
 
         if (!name || !contact) {
             alert('お名前とご連絡先は必須入力です！');
@@ -280,9 +286,11 @@
         }
 
         try {
+            // Firestoreへ項目を追加して保存
             await addDoc(collection(db, "orders"), {
                 clientName: name,
                 clientContact: contact,
+                clientComment: comment,               // ★新しく保存するフリーコメント
                 details: estimateData.cards,
                 finalTotal: estimateData.finalTotal,
                 status: "未対応",
