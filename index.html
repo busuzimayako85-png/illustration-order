@@ -506,6 +506,36 @@
     window.changeQty = changeQty;
     window.toggleQty = toggleQty;
     window.calculate = calculate;
+
+    // ─── ページ読み込み時にLocalStorageからデータを復元する関数 ───
+function loadPreviousEstimate() {
+    const savedDataString = localStorage.getItem('currentEstimate');
+    if (!savedDataString) return; // 保存されたデータがなければ何もしない
+
+    try {
+        const data = JSON.parse(savedDataString);
+        
+        // 1. カードの枚数を復元（必要に応じてカードを増やす）
+        const container = document.getElementById('cardsContainer'); // カードが入る要素のID
+        container.innerHTML = ''; // 一旦クリアして保存データ分だけ作り直す
+
+        data.cards.forEach((cardData, index) => {
+            // ここで元々使っていた「カードを追加する関数」を呼び出します
+            // 例: addCardWithData(cardData); 
+            // ※お使いのコードの「カード追加関数」に合わせて調整が必要です
+        });
+
+        // 2. 合計金額などの表示を再計算
+        updateTotal(); 
+
+    } catch (e) {
+        console.error("データの復元に失敗しました:", e);
+    }
+}
+
+// ページが読み込まれたら実行
+document.addEventListener('DOMContentLoaded', loadPreviousEstimate);
+
 </script>
 </body>
 </html>
