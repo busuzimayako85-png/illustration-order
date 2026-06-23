@@ -267,7 +267,6 @@
         if(targetCard) targetCard.classList.add('active');
     };
 
-    // ★すべてのカードの状態を見て削除ボタンの表示・非表示を完璧に同期させる仕組み
     window.refreshTabNumbers = function() {
         const cards = document.querySelectorAll('.illustration-card');
         const totalCardsCount = cards.length;
@@ -276,26 +275,21 @@
             const currentUniqueId = card.id.split('_')[1];
             const displayNum = index + 1; 
 
-            // タブ名と見出しの連番を更新
             const tabBtn = document.getElementById(`tabBtn_${currentUniqueId}`);
             if (tabBtn) tabBtn.innerText = `ILLUSTRATION #${displayNum}`;
 
             const cardTitle = card.querySelector('.card-title');
             if (cardTitle) cardTitle.innerText = `ILLUSTRATION #${displayNum} (${displayNum}枚目)`;
 
-            // 削除ボタンの制御
             const header = card.querySelector('.card-header');
             let removeBtn = document.getElementById(`removeBtn_${currentUniqueId}`);
             
             if (totalCardsCount === 1) {
-                // 最後の1枚しか残っていないなら、どのカードであっても削除ボタンを消去する
                 if (removeBtn) removeBtn.remove();
             } else {
-                // 画面に2枚以上存在するなら、1枚目も含めてすべてのカードに削除ボタンを表示・設置する
                 if (!removeBtn) {
                     const btnHtml = `<button type="button" class="remove-card-btn" id="removeBtn_${currentUniqueId}">REMOVE (削除)</button>`;
                     header.insertAdjacentHTML('beforeend', btnHtml);
-                    // 追加した直後のボタンに対してイベントをきっちり紐付ける
                     document.getElementById(`removeBtn_${currentUniqueId}`).addEventListener('click', () => window.removeCard(currentUniqueId));
                 }
             }
@@ -404,6 +398,12 @@
         window.refreshTabNumbers();
         window.switchTab(currentId);
         window.calculate();
+
+        // ★追加ボタンが押された時のみ、ページ最上部へスムーズにスクロールさせる
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
     };
 
     window.removeCard = function(id) {
@@ -581,9 +581,11 @@
         }
     };
 
+    // 保存データ読み込み用の初期関数（ここでの追加はスクロールさせないように細工）
     window.loadSavedEstimate = function() {
         const rawData = sessionStorage.getItem('currentEstimate');
         if (!rawData) {
+            // 直接addNewCardを実行するとスクロールが走るが、初期ロード時は元々top:0なので問題なし
             window.addNewCard();
             return;
         }
@@ -593,6 +595,10 @@
             window.addNewCard();
             return;
         }
+
+        // 初期復元中にscrollToが何度も走るのを防ぐため、一時的に関数を退避して復元
+        const originalScroll = window.scrollTo;
+        window.scrollTo = function() {}; 
 
         data.cards.forEach((cardData, idx) => {
             window.addNewCard(); 
@@ -617,6 +623,9 @@
                 }
             });
         });
+
+        // スクロール処理を元に戻す
+        window.scrollTo = originalScroll;
 
         const remainingCards = document.querySelectorAll('.illustration-card');
         if (remainingCards.length > 0) {
