@@ -17,17 +17,19 @@
         .save-btn { background: #d500f9; color: #fff; border: none; padding: 10px 20px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 10px; }
         .radio-label { display: block; margin-top: 10px; font-size: 14px; color: #aaa; cursor: pointer; }
         .order-list { margin-top: 15px; }
-        .no-orders { text-align: center; padding: 30px; color: #666; font-size: 14px; background: #1a1a1a; border-radius: 4px; border: 1px dashed #333; }
         .order-card { background: #1d1d1d; border: 1px solid #333; border-left: 5px solid #00e5ff; border-radius: 4px; padding: 20px; margin-bottom: 15px; }
         .order-card.status-対応中 { border-left-color: #ffea00; }
-        .order-card.status-完了 { border-left-color: #00e676; opacity: 0.6; }
+        .order-card.status-完了 { border-left-color: #00e676; opacity: 0.8; }
         .order-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #2a2a2a; padding-bottom: 10px; margin-bottom: 15px; }
         .name { font-size: 18px; font-weight: bold; color: #fff; }
         .contact { font-size: 13px; color: #00e5ff; margin-top: 4px; }
-        .order-details-box { background: #151515; padding: 12px; border-radius: 4px; margin-bottom: 15px; font-size: 13px; }
+        .order-date { font-size: 12px; color: #666; text-align: right; }
+        .order-details-box { background: #151515; padding: 12px; border-radius: 4px; margin-bottom: 15px; font-size: 13px; line-height: 1.5; }
+        .detail-item-title { color: #d500f9; font-weight: bold; margin-bottom: 4px; }
+        .detail-bullet { color: #bbb; padding-left: 10px; margin: 2px 0; }
         .comment-box { background: #221a24; border-left: 3px solid #d500f9; padding: 10px; font-size: 13px; margin-bottom: 15px; white-space: pre-wrap; }
         .order-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #2a2a2a; padding-top: 12px; }
-        .status-select { background: #121212; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 4px; cursor: pointer; }
+        .status-select { background: #121212; color: #fff; border: 1px solid #444; padding: 6px; border-radius: 4px; cursor: pointer; }
         .delete-btn { background: #331111; color: #ff5252; border: 1px solid #552222; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
     </style>
 
@@ -53,13 +55,11 @@
             if (document.getElementById('passwordInput').value === '85admin') {
                 document.getElementById('loginOverlay').style.display = 'none';
                 document.getElementById('adminContent').style.display = 'block';
-                // データ取得と描画
                 onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap) => {
                     allOrders = [];
                     snap.forEach(d => allOrders.push({id: d.id, ...d.data()}));
                     render();
                 });
-                // 設定取得
                 const s = await getDoc(doc(db, "settings", "schedule"));
                 if(s.exists()){
                     document.getElementById('scheduleInput').value = s.data().text;
@@ -77,18 +77,34 @@
             
             filtered.forEach(data => {
                 const status = data.status || '未対応';
+                const t = data.createdAt?.toDate();
+                const dateStr = t ? `${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()} ${t.getHours()}:${t.getMinutes().toString().padStart(2,'0')}` : '---';
+
                 let dHtml = '';
-                if(Array.isArray(data.details)) data.details.forEach((i, idx) => dHtml += `<div class="detail-bullet">🎨 #${idx+1}: ${TRANSLATIONS.base[i.base]} / ${TRANSLATIONS.bg[i.bg]}</div>`);
+                if(Array.isArray(data.details)) {
+                    data.details.forEach((i, idx) => {
+                        let diffs = [];
+                        if(i.faceDiff > 0) diffs.push(`表情×${i.faceDiff}`);
+                        if(i.poseDiff > 0) diffs.push(`ポーズ×${i.poseDiff}`);
+                        if(i.clothDiff > 0) diffs.push(`服装×${i.clothDiff}`);
+                        dHtml += `<div style="margin-bottom:8px;">
+                            <div class="detail-item-title">🎨 #${idx+1}</div>
+                            <div class="detail-bullet">・ベース: ${TRANSLATIONS.base[i.base]} / 背景: ${TRANSLATIONS.bg[i.bg]}</div>
+                            <div class="detail-bullet">・差分: ${diffs.length > 0 ? diffs.join(', ') : 'なし'}</div>
+                        </div>`;
+                    });
+                }
                 
                 container.insertAdjacentHTML('beforeend', `
                     <div class="order-card status-${status}">
                         <div class="order-header">
                             <div><div class="name">${data.clientName}</div><div class="contact">🔑 ${data.clientContact}</div></div>
+                            <div class="order-date">${dateStr}</div>
                         </div>
                         <div class="order-details-box">${dHtml}</div>
                         ${data.clientComment ? `<div class="comment-box">💬 ${data.clientComment}</div>` : ''}
                         <div class="order-footer">
-                            <div>合計: ${(data.finalTotal || 0).toLocaleString()}円</div>
+                            <div style="font-weight:bold; color:#ff1744;">合計: ${(data.finalTotal || 0).toLocaleString()}円</div>
                             <div style="display:flex; gap:10px;">
                                 <select class="status-select" onchange="window.updateStatus('${data.id}', this.value)">
                                     <option value="未対応" ${status==='未対応'?'selected':''}>未対応</option>
@@ -131,10 +147,10 @@
         <div class="section">
             <h2>② 受信した相談一覧</h2>
             <select class="status-select" style="width:100%; margin-bottom:15px;" onchange="setFilter(this.value)">
-                <option value="全て">▼ すべてのステータス</option>
-                <option value="未対応">🔴 未対応</option>
-                <option value="対応中">🟡 対応中</option>
-                <option value="完了">🟢 完了</option>
+                <option value="全て">▼ すべてのステータスを表示</option>
+                <option value="未対応">🔴 未対応のみ</option>
+                <option value="対応中">🟡 対応中のみ</option>
+                <option value="完了">🟢 完了のみ</option>
             </select>
             <div class="order-list" id="orderListContainer"></div>
         </div>
