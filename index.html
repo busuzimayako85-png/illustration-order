@@ -247,7 +247,23 @@
         </form>
     </div>
 
-<script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+    // 【重要】admin.htmlにある設定と同じ内容をここに入れてください！
+    const firebaseConfig = {
+        apiKey: "AIzaSyDi4twz34suKR2KXztm19FbUF-dtJN4OQU",
+        authDomain: "busuzimayako85-order.firebaseapp.com",
+        projectId: "busuzimayako85-order",
+        storageBucket: "busuzimayako85-order.firebasestorage.app",
+        messagingSenderId: "921095725285",
+        appId: "1:921095725285:web:d65f6accf6ddb28765f40c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
     const PRICES = {
         base: { face: 9000, bust: 11000, full: 12000 },
         bg: { none: 0, simple: 2000, custom: 3000, random: 6000 },
@@ -663,16 +679,25 @@
         window.calculate();
     }
 
-    // ページを開いた時に、一度だけFirebaseの設定を見に行く
-    getDoc(doc(db, "settings", "schedule")).then((s) => {
-        if(s.exists()){
-            const data = s.data();
-            if(data.mode === 'stop') {
-                document.getElementById('normalScheduleBox').style.display = 'none';
-                document.getElementById('stopAlertBox').style.display = 'block';
-            } else {
-                document.getElementById('normalScheduleBox').style.display = 'block';
-                document.getElementById('stopAlertBox').style.display = 'none';
+    // 【仕上げ】ページが開いた時にデータを読み込んで表示を切り替える
+    getDoc(doc(db, "settings", "schedule")).then((docSnap) => {
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            const isStop = (data.mode === 'stop');
+            
+            // 画面の表示を切り替え
+            document.getElementById('normalScheduleBox').style.display = isStop ? 'none' : 'block';
+            document.getElementById('stopAlertBox').style.display = isStop ? 'block' : 'none';
+            
+            // 文字も更新するならここ（必要に応じて）
+            if (document.getElementById('currentSchedule')) {
+                document.getElementById('currentSchedule').innerText = data.text;
+            }
+
+            // システムを停止状態にする
+            if (isStop) {
+                window.currentSiteModeIsStop = true;
+                window.calculate(); // 再計算してボタンを無効化
             }
         }
     });
