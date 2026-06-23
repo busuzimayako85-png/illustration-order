@@ -69,6 +69,12 @@
             } else alert('パスワードが違います。');
         };
 
+        document.getElementById('passwordInput').addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                window.checkLogin();
+            }
+        });
+
         window.setFilter = (v) => { currentFilter = v; render(); };
 
         window.copyStatusUrl = (id) => {
