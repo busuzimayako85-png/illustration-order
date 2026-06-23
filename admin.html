@@ -10,162 +10,316 @@
         h1 { color: #fff; border-bottom: 2px solid #d500f9; padding-bottom: 10px; font-size: 28px; margin-top: 0; }
         h2 { color: #00e5ff; margin-top: 30px; font-size: 20px; }
         .section { background: #252525; padding: 20px; border-radius: 6px; margin-bottom: 20px; }
+        
+        /* ログイン画面のスタイル */
         .login-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:#0b0b0b; display:flex; justify-content:center; align-items:center; z-index:1000; }
         .login-box { background:#1e1e1e; padding:40px; border-radius:8px; border:2px solid #d500f9; text-align:center; max-width:400px; width:90%; }
+        
+        /* 共通コンポーネント */
         .tmpl-btn { background: #333; color: #fff; border: 1px solid #555; padding: 8px 12px; margin-right: 5px; margin-bottom: 5px; cursor: pointer; border-radius: 4px; font-size: 13px; }
+        .tmpl-btn:hover { background: #444; border-color: #00e5ff; }
         .input-text { width: 100%; padding: 12px; background: #121212; color: #fff; border: 1px solid #444; border-radius: 4px; box-sizing: border-box; margin-top: 10px; font-size: 16px; }
         .save-btn { background: #d500f9; color: #fff; border: none; padding: 10px 20px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        .save-btn:hover { opacity: 0.9; box-shadow: 0 0 10px rgba(213, 0, 249, 0.5); }
+        
         .radio-label { display: block; margin-top: 10px; font-size: 14px; color: #aaa; cursor: pointer; }
+
+        /* ─── 追加：依頼カード・オーダーリスト周りのデザイン ─── */
         .order-list { margin-top: 15px; }
-        .order-card { background: #1d1d1d; border: 1px solid #333; border-left: 5px solid #00e5ff; border-radius: 4px; padding: 20px; margin-bottom: 15px; }
+        .no-orders { text-align: center; padding: 30px; color: #666; font-size: 14px; background: #1a1a1a; border-radius: 4px; border: 1px dashed #333; }
+        
+        .order-card { background: #1d1d1d; border: 1px solid #333; border-left: 5px solid #00e5ff; border-radius: 4px; padding: 20px; margin-bottom: 15px; position: relative; }
         .order-card.status-対応中 { border-left-color: #ffea00; }
         .order-card.status-完了 { border-left-color: #00e676; opacity: 0.6; }
+
         .order-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #2a2a2a; padding-bottom: 10px; margin-bottom: 15px; }
-        .name { font-size: 18px; font-weight: bold; color: #fff; }
-        .contact { font-size: 13px; color: #00e5ff; margin-top: 4px; }
+        .client-info .name { font-size: 18px; font-weight: bold; color: #fff; }
+        .client-info .contact { font-size: 13px; color: #00e5ff; margin-top: 4px; }
         .order-date { font-size: 12px; color: #666; text-align: right; }
+
         .order-details-box { background: #151515; padding: 12px; border-radius: 4px; margin-bottom: 15px; font-size: 13px; line-height: 1.5; }
         .detail-item-title { color: #d500f9; font-weight: bold; margin-bottom: 4px; }
         .detail-bullet { color: #bbb; padding-left: 10px; margin: 2px 0; }
-        .comment-box { background: #221a24; border-left: 3px solid #d500f9; padding: 10px; font-size: 13px; margin-bottom: 15px; white-space: pre-wrap; }
+        
+        .comment-box { background: #221a24; border-left: 3px solid #d500f9; padding: 10px; font-size: 13px; border-radius: 0 4px 4px 0; color: #e0e0e0; margin-bottom: 15px; white-space: pre-wrap; }
+        
         .order-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #2a2a2a; padding-top: 12px; }
         .order-total { font-size: 16px; font-weight: bold; color: #ff1744; }
+        
+        .controls { display: flex; gap: 8px; align-items: center; }
         .status-select { background: #121212; color: #fff; border: 1px solid #444; padding: 6px 10px; border-radius: 4px; font-size: 13px; cursor: pointer; }
+        .status-select:focus { border-color: #00e5ff; outline: none; }
         .delete-btn { background: #331111; color: #ff5252; border: 1px solid #552222; padding: 6px 12px; border-radius: 4px; font-size: 13px; cursor: pointer; }
+        .delete-btn:hover { background: #ff5252; color: #fff; }
     </style>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, onSnapshot, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-        const db = getFirestore(initializeApp({
+        // Firebaseの設定
+        const firebaseConfig = {
             apiKey: "AIzaSyDi4twz34suKR2KXztm19FbUF-dtJN4OQU",
             authDomain: "busuzimayako85-order.firebaseapp.com",
             projectId: "busuzimayako85-order",
             storageBucket: "busuzimayako85-order.firebasestorage.app",
             messagingSenderId: "921095725285",
             appId: "1:921095725285:web:d65f6accf6ddb28765f40c"
-        }));
+        };
 
-        const TRANSLATIONS = { base: { face: 'フェイスアップ', bust: 'バストアップ', full: '全身' }, bg: { none: '背景なし', simple: '簡易背景', custom: 'しっかり背景(指定あり)', random: 'しっかり背景(おまかせ)' } };
-        
-        let allOrders = [];
-        let currentFilter = '全て';
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-        window.checkLogin = async () => {
-            if (document.getElementById('passwordInput').value === '85admin') {
+        // コード値を日本語へ翻訳するマッピング用辞書
+        const TRANSLATIONS = {
+            base: { face: 'フェイスアップ', bust: 'バストアップ', full: '全身' },
+            bg: { none: '背景なし', simple: '簡易背景', custom: 'しっかり背景(指定あり)', random: 'しっかり背景(おまかせ)' }
+        };
+
+        // ログインチェック関数
+        window.checkLogin = async function() {
+            const pass = document.getElementById('passwordInput').value;
+            if (pass === '85admin') {
                 document.getElementById('loginOverlay').style.display = 'none';
                 document.getElementById('adminContent').style.display = 'block';
-                onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap) => {
-                    allOrders = [];
-                    snap.forEach(d => allOrders.push({id: d.id, ...d.data()}));
-                    render();
-                });
-                const s = await getDoc(doc(db, "settings", "schedule"));
-                if(s.exists()){
-                    document.getElementById('scheduleInput').value = s.data().text;
-                    document.getElementById(s.data().mode === 'stop' ? 'modeStop' : 'modeNormal').checked = true;
-                }
-            } else alert('パスワードが違います。');
+                await loadCurrentStatus();
+                listenToOrders(); // ★ログイン成功時に注文データのリアルタイム監視を開始
+            } else {
+                alert('パスワードが違います。');
+            }
         };
 
-        window.setFilter = (v) => { currentFilter = v; render(); };
-
-        window.copyStatusUrl = (id) => {
-            // URLのドメイン部分は現在の環境に合わせてください
-            const url = `https://busuzimayako85-order.web.app/status.html?id=${id}`;
-            navigator.clipboard.writeText(url).then(() => alert("URLをコピーしました！"));
-        };
-
-        function render() {
-            const container = document.getElementById('orderListContainer');
-            container.innerHTML = '';
-            const filtered = allOrders.filter(o => currentFilter === '全て' || (o.status || '未対応') === currentFilter);
-            
-            filtered.forEach(data => {
-                const status = data.status || '未対応';
-                const t = data.createdAt?.toDate();
-                const dateStr = t ? `${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()} ${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}` : '---';
-
-                let dHtml = '';
-                if(Array.isArray(data.details)) {
-                    data.details.forEach((i, idx) => {
-                        let diffs = [];
-                        if(i.faceDiff > 0) diffs.push(`表情差分×${i.faceDiff}`);
-                        if(i.poseDiff > 0) diffs.push(`ポーズ差分×${i.poseDiff}`);
-                        if(i.clothDiff > 0) diffs.push(`服装差分×${i.clothDiff}`);
-                        dHtml += `<div style="margin-bottom:8px;">
-                            <div class="detail-item-title">🎨 イラスト #${idx + 1}</div>
-                            <div class="detail-bullet">・ベース: ${TRANSLATIONS.base[i.base] || i.base}</div>
-                            <div class="detail-bullet">・背景: ${TRANSLATIONS.bg[i.bg] || i.bg}</div>
-                            <div class="detail-bullet">・差分オプション: ${diffs.length > 0 ? diffs.join(', ') : 'なし'}</div>
-                        </div>`;
-                    });
-                }
+        // 現在のFirestoreの値を読み込んで画面にセットする関数
+        async function loadCurrentStatus() {
+            try {
+                const docRef = doc(db, "settings", "schedule");
+                const docSnap = await getDoc(docRef);
                 
-                container.insertAdjacentHTML('beforeend', `
-                    <div class="order-card status-${status}">
-                        <div class="order-header">
-                            <div>
-                                <div class="name">${data.clientName || '名前なし'}</div>
-                                <div class="contact">🔑 連絡先: ${data.clientContact || '未記入'}</div>
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    document.getElementById('scheduleInput').value = data.text || '';
+                    if (data.mode === 'stop') {
+                        document.getElementById('modeStop').checked = true;
+                    } else {
+                        document.getElementById('modeNormal').checked = true;
+                    }
+                } else {
+                    document.getElementById('scheduleInput').value = '現在【7月以降】受付中（残り2枠）';
+                    document.getElementById('modeNormal').checked = true;
+                }
+            } catch (error) {
+                console.error("データ読み込みエラー:", error);
+                alert("現在の設定の読み込みに失敗しました。");
+            }
+        }
+
+        // Firestoreへ設定を保存する関数
+        window.updateSchedule = async function() {
+            const textVal = document.getElementById('scheduleInput').value;
+            const modeVal = document.querySelector('input[name="siteMode"]:checked').value;
+            
+            try {
+                await setDoc(doc(db, "settings", "schedule"), {
+                    text: textVal,
+                    mode: modeVal,
+                    updatedAt: new Date()
+                });
+                alert("Firestoreの更新が完了しました！");
+            } catch (error) {
+                console.error("データ保存エラー:", error);
+                alert("保存に失敗しました: " + error.message);
+            }
+        };
+
+        // ★新設：Firestoreから送られてくるオーダー情報をリアルタイム監視して描画する関数
+        function listenToOrders() {
+            const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+            
+            onSnapshot(q, (querySnapshot) => {
+                const orderListContainer = document.getElementById('orderListContainer');
+                orderListContainer.innerHTML = ''; // 一旦クリア
+
+                if (querySnapshot.empty) {
+                    orderListContainer.innerHTML = '<div class="no-orders">受信した依頼情報はまだありません。</div>';
+                    return;
+                }
+
+                querySnapshot.forEach((docSnap) => {
+                    const id = docSnap.id;
+                    const data = docSnap.data();
+
+                    // 日付フォーマット変換
+                    let dateStr = '---';
+                    if (data.createdAt) {
+                        const t = data.createdAt.toDate();
+                        dateStr = `${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()} ${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}`;
+                    }
+
+                    // イラスト詳細内訳HTMLの作成
+                    let detailsHtml = '';
+                    if (Array.isArray(data.details)) {
+                        data.details.forEach((item, idx) => {
+                            const bName = TRANSLATIONS.base[item.base] || item.base;
+                            const bgName = TRANSLATIONS.bg[item.bg] || item.bg;
+                            
+                            let diffs = [];
+                            if (item.faceDiff > 0) diffs.push(`表情差分×${item.faceDiff}`);
+                            if (item.poseDiff > 0) diffs.push(`ポーズ差分×${item.poseDiff}`);
+                            if (item.clothDiff > 0) diffs.push(`服装差分×${item.clothDiff}`);
+                            const diffsStr = diffs.length > 0 ? diffs.join(', ') : 'なし';
+
+                            detailsHtml += `
+                                <div style="margin-bottom:8px; ${idx > 0 ? 'border-top:1px dashed #333; padding-top:8px;' : ''}">
+                                    <div class="detail-item-title">🎨 イラスト #${idx + 1}</div>
+                                    <div class="detail-bullet">・ベース: ${bName}</div>
+                                    <div class="detail-bullet">・背景: ${bgName}</div>
+                                    <div class="detail-bullet">・差分オプション: ${diffsStr}</div>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    // コメント欄の表示有無
+                    const commentHtml = data.clientComment 
+                        ? `<div class="comment-box"><strong>💬 メッセージ・要望:</strong><br>${escapeHtml(data.clientComment)}</div>` 
+                        : '';
+
+                    // ステータスのセレクトボックス選択状態設定
+                    const statusValue = data.status || "未対応";
+
+                    const cardHtml = `
+                        <div class="order-card status-${statusValue}">
+                            <div class="order-header">
+                                <div class="client-info">
+                                    <div class="name">${escapeHtml(data.clientName || '名前なし')}</div>
+                                    <div class="contact">🔑 連絡先: ${escapeHtml(data.clientContact || '未記入')}</div>
+                                </div>
+                                <div class="order-date">${dateStr}</div>
                             </div>
-                            <div class="order-date">${dateStr}</div>
-                        </div>
-                        <div class="order-details-box">${dHtml}</div>
-                        ${data.clientComment ? `<div class="comment-box"><strong>💬 メッセージ・要望:</strong><br>${data.clientComment}</div>` : ''}
-                        <div class="order-footer">
-                            <div class="order-total">合計概算: ${(data.finalTotal || 0).toLocaleString()} 円</div>
-                            <div style="display:flex; gap:8px; align-items:center;">
-                                <button class="tmpl-btn" style="background:#00e5ff; color:#000; font-weight:bold; border:none;" onclick="window.copyStatusUrl('${data.id}')">🔗 URLコピー</button>
-                                <select class="status-select" onchange="window.updateStatus('${data.id}', this.value)">
-                                    <option value="未対応" ${status==='未対応'?'selected':''}>🔴 未対応</option>
-                                    <option value="対応中" ${status==='対応中'?'selected':''}>🟡 対応中</option>
-                                    <option value="完了" ${status==='完了'?'selected':''}>🟢 完了</option>
-                                </select>
-                                <button class="delete-btn" onclick="window.del('${data.id}')">削除</button>
+
+                            <div class="order-details-box">
+                                ${detailsHtml}
+                            </div>
+
+                            ${commentHtml}
+
+                            <div class="order-footer">
+                                <div class="order-total">合計概算: ${(data.finalTotal || 0).toLocaleString()} 円</div>
+                                <div class="controls">
+                                    <!-- ★ここが修正ポイント：URLコピーボタンを追加 -->
+                                    <button class="tmpl-btn" style="background:#00e5ff; color:#000; font-weight:bold; border:none; padding:6px 10px;" 
+                                            onclick="window.copyStatusUrl('${id}')">🔗 URLコピー</button>
+
+                                    <select class="status-select" onchange="window.updateOrderStatus('${id}', this.value)">
+                                        <option value="未対応" ${statusValue === '未対応' ? 'selected' : ''}>🔴 未対応</option>
+                                        <option value="対応中" ${statusValue === '対応中' ? 'selected' : ''}>🟡 対応中</option>
+                                        <option value="完了" ${statusValue === '完了' ? 'selected' : ''}>🟢 完了</option>
+                                    </select>
+                                    <button class="delete-btn" onclick="window.deleteOrder('${id}')">削除</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `);
+                    `;
+                    orderListContainer.insertAdjacentHTML('beforeend', cardHtml);
+                });
             });
         }
 
-        window.updateStatus = async (id, s) => await updateDoc(doc(db, "orders", id), { status: s });
-        window.del = async (id) => { if(confirm("削除してもよろしいですか？")) await deleteDoc(doc(db, "orders", id)); };
-        window.updateSchedule = async () => { await setDoc(doc(db, "settings", "schedule"), { text: document.getElementById('scheduleInput').value, mode: document.querySelector('input[name="siteMode"]:checked').value }); alert("保存しました"); };
-        window.useTemplate = (t, m) => { document.getElementById('scheduleInput').value = t; document.getElementById(m==='stop'?'modeStop':'modeNormal').checked = true; };
+        // ★新設：対応ステータスをその場で更新する関数
+        window.updateOrderStatus = async function(id, newStatus) {
+            try {
+                const docRef = doc(db, "orders", id);
+                await updateDoc(docRef, { status: newStatus });
+            } catch (error) {
+                console.error("ステータス更新エラー:", error);
+                alert("ステータスの変更に失敗しました。");
+            }
+        };
+
+        // ★新設：データを不必要になったら削除する関数
+        window.deleteOrder = async function(id) {
+            if (!confirm("このご相談データを削除してもよろしいですか？\n(復元はできません)")) return;
+            try {
+                const docRef = doc(db, "orders", id);
+                await deleteDoc(docRef);
+            } catch (error) {
+                console.error("削除エラー:", error);
+                alert("削除に失敗しました。");
+            }
+        };
+
+        // エスケープ関数（XSS対策用）
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;')
+                      .replace(/'/g, '&#039;');
+        }
     </script>
 </head>
 <body>
-    <div class="login-overlay" id="loginOverlay">
-        <div class="login-box">
-            <h2>ADMIN LOGIN</h2>
-            <input type="password" id="passwordInput" class="input-text" placeholder="PASSWORD">
-            <button class="save-btn" onclick="checkLogin()">LOGIN</button>
+
+<div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+        <h2 style="margin-top:0; color:#fff;">ADMIN LOGIN</h2>
+        <p style="font-size:12px; color:#888;">パスワードを入力してください (初期設定: 85admin)</p>
+        <input type="password" id="passwordInput" class="input-text" placeholder="PASSWORD" style="text-align:center;" onkeydown="if(event.key==='Enter') checkLogin()">
+        <button class="save-btn" style="width:100%; margin-top:20px;" onclick="checkLogin()">LOGIN</button>
+    </div>
+</div>
+
+<div class="admin-container" id="adminContent" style="display:none;">
+    <h1>busuzimayako85 管理デスク</h1>
+
+    <!-- ① スケジュール・受付状況設定セクション -->
+    <div class="section">
+        <h2>① 受付状況・スケジュールの更新</h2>
+        <div style="margin-bottom: 15px;">
+            <small style="color: #888;">テンプレートを選択して文字を書き換えてください：</small><br><br>
+            <button class="tmpl-btn" onclick="useTemplate('現在【7月以降】受付中（残り2枠）', 'normal')">【受付中】通常モード</button>
+            <button class="tmpl-btn" onclick="useTemplate('依頼停止中（8月再開予定）', 'stop')">【停止中】再開予定あり</button>
+            <button class="tmpl-btn" onclick="useTemplate('依頼停止中（再開未定）', 'stop')">【停止中】再開未定</button>
+        </div>
+        
+        <input type="text" id="scheduleInput" class="input-text" value="">
+        
+        <div style="margin-top:15px;">
+            <label class="radio-label">
+                <input type="radio" name="siteMode" id="modeNormal" value="normal"> 表画面を「通常受付（注文可能）」にする
+            </label>
+            <label class="radio-label">
+                <input type="radio" name="siteMode" id="modeStop" value="stop"> 表画面を「新規依頼停止（シミュレーションのみ）」にする
+            </label>
+        </div>
+
+        <button class="save-btn" onclick="updateSchedule()">この設定で表画面へ反映する</button>
+    </div>
+
+    <!-- ② ★新設：受信した依頼内容一覧セクション -->
+    <div class="section">
+        <h2>② 受信した相談・見積もり一覧</h2>
+        <p style="font-size: 12px; color: #888; margin-top: -5px; margin-bottom: 15px;">
+            クライアントが表画面のフォームから送信したデータがここにリアルタイムに表示されます。
+        </p>
+        <div class="order-list" id="orderListContainer">
+            <p style="color: #666; text-align: center; font-size: 14px;">読み込み中...</p>
         </div>
     </div>
-    <div class="admin-container" id="adminContent" style="display:none;">
-        <h1>busuzimayako85 管理デスク</h1>
-        <div class="section">
-            <h2>① 受付状況・スケジュール</h2>
-            <button class="tmpl-btn" onclick="useTemplate('現在【7月以降】受付中（残り2枠）', 'normal')">【通常】</button>
-            <button class="tmpl-btn" onclick="useTemplate('依頼停止中（8月再開予定）', 'stop')">【停止】</button>
-            <input type="text" id="scheduleInput" class="input-text">
-            <label class="radio-label"><input type="radio" name="siteMode" id="modeNormal" value="normal"> 通常受付</label>
-            <label class="radio-label"><input type="radio" name="siteMode" id="modeStop" value="stop"> 依頼停止</label>
-            <button class="save-btn" onclick="updateSchedule()">更新</button>
-        </div>
-        <div class="section">
-            <h2>② 受信した相談一覧</h2>
-            <select class="status-select" style="width:100%; margin-bottom:15px;" onchange="setFilter(this.value)">
-                <option value="全て">▼ すべてのステータスを表示</option>
-                <option value="未対応">🔴 未対応のみ</option>
-                <option value="対応中">🟡 対応中のみ</option>
-                <option value="完了">🟢 完了のみ</option>
-            </select>
-            <div class="order-list" id="orderListContainer"></div>
-        </div>
-    </div>
+</div>
+
+<script>
+    // テンプレート流し込み（入力欄とラジオボタンを同期）
+    function useTemplate(text, mode) {
+        document.getElementById('scheduleInput').value = text;
+        if (mode === 'stop') {
+            document.getElementById('modeStop').checked = true;
+        } else {
+            document.getElementById('modeNormal').checked = true;
+        }
+    }
+    
+</script>
 </body>
 </html>
