@@ -19,7 +19,7 @@
         .order-list { margin-top: 15px; }
         .order-card { background: #1d1d1d; border: 1px solid #333; border-left: 5px solid #00e5ff; border-radius: 4px; padding: 20px; margin-bottom: 15px; }
         .order-card.status-対応中 { border-left-color: #ffea00; }
-        .order-card.status-完了 { border-left-color: #00e676; opacity: 0.8; }
+        .order-card.status-完了 { border-left-color: #00e676; opacity: 0.6; }
         .order-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #2a2a2a; padding-bottom: 10px; margin-bottom: 15px; }
         .name { font-size: 18px; font-weight: bold; color: #fff; }
         .contact { font-size: 13px; color: #00e5ff; margin-top: 4px; }
@@ -29,8 +29,9 @@
         .detail-bullet { color: #bbb; padding-left: 10px; margin: 2px 0; }
         .comment-box { background: #221a24; border-left: 3px solid #d500f9; padding: 10px; font-size: 13px; margin-bottom: 15px; white-space: pre-wrap; }
         .order-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #2a2a2a; padding-top: 12px; }
-        .status-select { background: #121212; color: #fff; border: 1px solid #444; padding: 6px; border-radius: 4px; cursor: pointer; }
-        .delete-btn { background: #331111; color: #ff5252; border: 1px solid #552222; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        .order-total { font-size: 16px; font-weight: bold; color: #ff1744; }
+        .status-select { background: #121212; color: #fff; border: 1px solid #444; padding: 6px 10px; border-radius: 4px; font-size: 13px; cursor: pointer; }
+        .delete-btn { background: #331111; color: #ff5252; border: 1px solid #552222; padding: 6px 12px; border-radius: 4px; font-size: 13px; cursor: pointer; }
     </style>
 
     <script type="module">
@@ -70,6 +71,11 @@
 
         window.setFilter = (v) => { currentFilter = v; render(); };
 
+        window.copyStatusUrl = (id) => {
+            const url = `https://busuzimayako85-order.web.app/?id=${id}`;
+            navigator.clipboard.writeText(url).then(() => alert("URLをコピーしました！"));
+        };
+
         function render() {
             const container = document.getElementById('orderListContainer');
             container.innerHTML = '';
@@ -78,19 +84,20 @@
             filtered.forEach(data => {
                 const status = data.status || '未対応';
                 const t = data.createdAt?.toDate();
-                const dateStr = t ? `${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()} ${t.getHours()}:${t.getMinutes().toString().padStart(2,'0')}` : '---';
+                const dateStr = t ? `${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()} ${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}` : '---';
 
                 let dHtml = '';
                 if(Array.isArray(data.details)) {
                     data.details.forEach((i, idx) => {
                         let diffs = [];
-                        if(i.faceDiff > 0) diffs.push(`表情×${i.faceDiff}`);
-                        if(i.poseDiff > 0) diffs.push(`ポーズ×${i.poseDiff}`);
-                        if(i.clothDiff > 0) diffs.push(`服装×${i.clothDiff}`);
+                        if(i.faceDiff > 0) diffs.push(`表情差分×${i.faceDiff}`);
+                        if(i.poseDiff > 0) diffs.push(`ポーズ差分×${i.poseDiff}`);
+                        if(i.clothDiff > 0) diffs.push(`服装差分×${i.clothDiff}`);
                         dHtml += `<div style="margin-bottom:8px;">
-                            <div class="detail-item-title">🎨 #${idx+1}</div>
-                            <div class="detail-bullet">・ベース: ${TRANSLATIONS.base[i.base]} / 背景: ${TRANSLATIONS.bg[i.bg]}</div>
-                            <div class="detail-bullet">・差分: ${diffs.length > 0 ? diffs.join(', ') : 'なし'}</div>
+                            <div class="detail-item-title">🎨 イラスト #${idx + 1}</div>
+                            <div class="detail-bullet">・ベース: ${TRANSLATIONS.base[i.base] || i.base}</div>
+                            <div class="detail-bullet">・背景: ${TRANSLATIONS.bg[i.bg] || i.bg}</div>
+                            <div class="detail-bullet">・差分オプション: ${diffs.length > 0 ? diffs.join(', ') : 'なし'}</div>
                         </div>`;
                     });
                 }
@@ -98,18 +105,22 @@
                 container.insertAdjacentHTML('beforeend', `
                     <div class="order-card status-${status}">
                         <div class="order-header">
-                            <div><div class="name">${data.clientName}</div><div class="contact">🔑 ${data.clientContact}</div></div>
+                            <div>
+                                <div class="name">${data.clientName || '名前なし'}</div>
+                                <div class="contact">🔑 連絡先: ${data.clientContact || '未記入'}</div>
+                            </div>
                             <div class="order-date">${dateStr}</div>
                         </div>
                         <div class="order-details-box">${dHtml}</div>
-                        ${data.clientComment ? `<div class="comment-box">💬 ${data.clientComment}</div>` : ''}
+                        ${data.clientComment ? `<div class="comment-box"><strong>💬 メッセージ・要望:</strong><br>${data.clientComment}</div>` : ''}
                         <div class="order-footer">
-                            <div style="font-weight:bold; color:#ff1744;">合計: ${(data.finalTotal || 0).toLocaleString()}円</div>
-                            <div style="display:flex; gap:10px;">
+                            <div class="order-total">合計概算: ${(data.finalTotal || 0).toLocaleString()} 円</div>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                <button class="tmpl-btn" style="background:#00e5ff; color:#000; font-weight:bold; border:none;" onclick="window.copyStatusUrl('${data.id}')">🔗 URLコピー</button>
                                 <select class="status-select" onchange="window.updateStatus('${data.id}', this.value)">
-                                    <option value="未対応" ${status==='未対応'?'selected':''}>未対応</option>
-                                    <option value="対応中" ${status==='対応中'?'selected':''}>対応中</option>
-                                    <option value="完了" ${status==='完了'?'selected':''}>完了</option>
+                                    <option value="未対応" ${status==='未対応'?'selected':''}>🔴 未対応</option>
+                                    <option value="対応中" ${status==='対応中'?'selected':''}>🟡 対応中</option>
+                                    <option value="完了" ${status==='完了'?'selected':''}>🟢 完了</option>
                                 </select>
                                 <button class="delete-btn" onclick="window.del('${data.id}')">削除</button>
                             </div>
@@ -120,7 +131,7 @@
         }
 
         window.updateStatus = async (id, s) => await updateDoc(doc(db, "orders", id), { status: s });
-        window.del = async (id) => { if(confirm("削除しますか？")) await deleteDoc(doc(db, "orders", id)); };
+        window.del = async (id) => { if(confirm("削除してもよろしいですか？")) await deleteDoc(doc(db, "orders", id)); };
         window.updateSchedule = async () => { await setDoc(doc(db, "settings", "schedule"), { text: document.getElementById('scheduleInput').value, mode: document.querySelector('input[name="siteMode"]:checked').value }); alert("保存しました"); };
         window.useTemplate = (t, m) => { document.getElementById('scheduleInput').value = t; document.getElementById(m==='stop'?'modeStop':'modeNormal').checked = true; };
     </script>
@@ -138,22 +149,4 @@
         <div class="section">
             <h2>① 受付状況・スケジュール</h2>
             <button class="tmpl-btn" onclick="useTemplate('現在【7月以降】受付中（残り2枠）', 'normal')">【通常】</button>
-            <button class="tmpl-btn" onclick="useTemplate('依頼停止中（8月再開予定）', 'stop')">【停止】</button>
-            <input type="text" id="scheduleInput" class="input-text">
-            <label class="radio-label"><input type="radio" name="siteMode" id="modeNormal" value="normal"> 通常受付</label>
-            <label class="radio-label"><input type="radio" name="siteMode" id="modeStop" value="stop"> 依頼停止</label>
-            <button class="save-btn" onclick="updateSchedule()">更新</button>
-        </div>
-        <div class="section">
-            <h2>② 受信した相談一覧</h2>
-            <select class="status-select" style="width:100%; margin-bottom:15px;" onchange="setFilter(this.value)">
-                <option value="全て">▼ すべてのステータスを表示</option>
-                <option value="未対応">🔴 未対応のみ</option>
-                <option value="対応中">🟡 対応中のみ</option>
-                <option value="完了">🟢 完了のみ</option>
-            </select>
-            <div class="order-list" id="orderListContainer"></div>
-        </div>
-    </div>
-</body>
-</html>
+            <button class="tmpl-btn" onclick="useTemplate('依頼停止中（8月再開予定）', 'stop')">【停止】</
