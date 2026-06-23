@@ -178,7 +178,7 @@
             transition: all 0.2s;
         }
         .add-card-btn:hover { background: #7cfc00; color: #000; box-shadow: 0 0 15px rgba(124, 252, 0, 0.4); }
-        .add-card-btn:disabled { opacity: 0.3; cursor: not-allowed; background: none !important; color: #444 !important; border-color: #444 !important; box-shadow: none !important; }
+        .add-card-btn:disabled { opacity: 0.3; cursor: not-allowed; background: #222 !important; color: #555 !important; border-color: #333 !important; box-shadow: none !important; }
 
         /* 金額表示ボックス */
         .total-box {
@@ -318,6 +318,10 @@
     };
 
     window.addNewCard = function() {
+        const cards = document.querySelectorAll('.illustration-card');
+        // ★すでに5枚ある場合は追加処理を行わない（安全策）
+        if (cards.length >= 5) return;
+
         uniqueIdCounter++;
         const currentId = uniqueIdCounter;
         
@@ -399,7 +403,7 @@
         window.switchTab(currentId);
         window.calculate();
 
-        // ★追加ボタンが押された時のみ、ページ最上部へスムーズにスクロールさせる
+        // 追加ボタンが押された時のみ、ページ最上部へスムーズにスクロールさせる
         window.scrollTo({
             top: 0,
             behavior: 'smooth'
@@ -564,7 +568,16 @@
         }
 
         document.getElementById('totalDisplay').innerText = finalTotal.toLocaleString() + " 円";
-        document.getElementById('addCardBtn').disabled = !allBasesSelected;
+        
+        // ★追加ボタンの制御（必須選択が終わっている、かつ現在5枚未満の場合のみ有効化）
+        const addCardBtn = document.getElementById('addCardBtn');
+        if (cards.length >= 5) {
+            addCardBtn.disabled = true;
+            addCardBtn.innerText = "MAX 5 ILLUSTRATIONS REACHED (最大5枚に達しました)";
+        } else {
+            addCardBtn.disabled = !allBasesSelected;
+            addCardBtn.innerText = "+ ADD ANOTHER ILLUSTRATION (枚数を追加する)";
+        }
         
         const submitBtn = document.getElementById('submitBtn');
         if (window.currentSiteModeIsStop) {
@@ -581,11 +594,10 @@
         }
     };
 
-    // 保存データ読み込み用の初期関数（ここでの追加はスクロールさせないように細工）
+    // 保存データ読み込み用の初期関数
     window.loadSavedEstimate = function() {
         const rawData = sessionStorage.getItem('currentEstimate');
         if (!rawData) {
-            // 直接addNewCardを実行するとスクロールが走るが、初期ロード時は元々top:0なので問題なし
             window.addNewCard();
             return;
         }
@@ -600,7 +612,10 @@
         const originalScroll = window.scrollTo;
         window.scrollTo = function() {}; 
 
-        data.cards.forEach((cardData, idx) => {
+        // 最大5枚までに抑えて復元
+        const safeCards = data.cards.slice(0, 5);
+
+        safeCards.forEach((cardData, idx) => {
             window.addNewCard(); 
             const currentId = idx + 1;
 
