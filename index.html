@@ -248,6 +248,25 @@
     </div>
 
 <script>
+    // Firestoreのデータを監視して、ステータスを自動更新する処理
+onSnapshot(doc(db, "settings", "schedule"), (docSnapshot) => {
+    if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+        
+        const statusElement = document.getElementById('currentSchedule'); 
+        
+        if (statusElement) {
+            if (data.mode === 'stop') {
+                statusElement.innerText = "【現在受付停止中です】";
+                statusElement.style.color = "red";
+            } else {
+                statusElement.innerText = "【現在受付中です】";
+                statusElement.style.color = "green";
+            }
+        }
+    }
+});
+
     const PRICES = {
         base: { face: 9000, bust: 11000, full: 12000 },
         bg: { none: 0, simple: 2000, custom: 3000, random: 6000 },
