@@ -267,7 +267,7 @@
         if(targetCard) targetCard.classList.add('active');
     };
 
-    // ★すべてのカードの状態を見て削除ボタンの表示・非表示を再制御する仕組み
+    // ★すべてのカードの状態を見て削除ボタンの表示・非表示を完璧に同期させる仕組み
     window.refreshTabNumbers = function() {
         const cards = document.querySelectorAll('.illustration-card');
         const totalCardsCount = cards.length;
@@ -283,18 +283,19 @@
             const cardTitle = card.querySelector('.card-title');
             if (cardTitle) cardTitle.innerText = `ILLUSTRATION #${displayNum} (${displayNum}枚目)`;
 
-            // 削除ボタンの制御ロジック
+            // 削除ボタンの制御
             const header = card.querySelector('.card-header');
             let removeBtn = document.getElementById(`removeBtn_${currentUniqueId}`);
             
             if (totalCardsCount === 1) {
-                // 残り1枚なら、1枚目だろうが何枚目だろうが削除ボタンを絶対に消す（画面消滅防止）
+                // 最後の1枚しか残っていないなら、どのカードであっても削除ボタンを消去する
                 if (removeBtn) removeBtn.remove();
             } else {
-                // 2枚以上あるなら、1枚目を含むすべてのカードに削除ボタンを表示する
+                // 画面に2枚以上存在するなら、1枚目も含めてすべてのカードに削除ボタンを表示・設置する
                 if (!removeBtn) {
                     const btnHtml = `<button type="button" class="remove-card-btn" id="removeBtn_${currentUniqueId}">REMOVE (削除)</button>`;
                     header.insertAdjacentHTML('beforeend', btnHtml);
+                    // 追加した直後のボタンに対してイベントをきっちり紐付ける
                     document.getElementById(`removeBtn_${currentUniqueId}`).addEventListener('click', () => window.removeCard(currentUniqueId));
                 }
             }
@@ -415,7 +416,6 @@
 
         window.refreshTabNumbers();
 
-        // 削除されたタブが元々アクティブ（開かれている状態）だった場合のみ、別のタブに自動フォーカスする
         if (wasActive) {
             const remainingCards = document.querySelectorAll('.illustration-card');
             if (remainingCards.length > 0) {
