@@ -64,8 +64,36 @@
             box-sizing: border-box;
         }
 
-        /* イラストごとのカード枠 */
+        /* ★新設：タブ切り替えシステム */
+        .tab-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #222;
+            padding-bottom: 10px;
+        }
+        .tab-button {
+            background: #111;
+            border: 1px solid #333;
+            color: #888;
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 4px 4px 0 0;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .tab-button.active {
+            background: #ff0055;
+            color: #fff;
+            border-color: #ff0055;
+            box-shadow: 0 0 10px rgba(255, 0, 85, 0.4);
+        }
+
+        /* イラストごとのカード枠（初期は非表示、activeクラスで表示） */
         .illustration-card {
+            display: none;
             background: #111;
             border: 1px solid #222;
             padding: 30px;
@@ -73,6 +101,9 @@
             border-radius: 6px;
             position: relative;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .illustration-card.active {
+            display: block;
         }
 
         .card-header {
@@ -198,6 +229,9 @@
         </div>
 
         <form id="orderForm" onsubmit="goToConfirmPage(event)">
+            
+            <div class="tab-wrapper" id="tabWrapper"></div>
+
             <div id="illustrationContainer"></div>
 
             <button type="button" id="addCardBtn" class="add-card-btn" onclick="addNewCard()">+ ADD ANOTHER ILLUSTRATION (枚数を追加する)</button>
@@ -275,10 +309,29 @@
         addNewCard();
     };
 
+    // ★タブ切り替え用の制御関数
+    function switchTab(targetId) {
+        // 全てのタブとカードのactiveを解除
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.illustration-card').forEach(card => card.classList.remove('active'));
+
+        // 対象のタブとカードをactive化
+        const targetTab = document.getElementById(`tabBtn_${targetId}`);
+        const targetCard = document.getElementById(`card_${targetId}`);
+        if(targetTab) targetTab.classList.add('active');
+        if(targetCard) targetCard.classList.add('active');
+    }
+
     function addNewCard() {
         cardCount++;
         const container = document.getElementById('illustrationContainer');
+        const tabWrapper = document.getElementById('tabWrapper');
         
+        // 1. タブボタンを生成
+        const tabHtml = `<button type="button" class="tab-button" id="tabBtn_${cardCount}" onclick="switchTab(${cardCount})">ILLUSTRATION #${cardCount}</button>`;
+        tabWrapper.insertAdjacentHTML('beforeend', tabHtml);
+
+        // 2. イラスト内容のカードを生成
         const cardHtml = `
             <div class="illustration-card" id="card_${cardCount}">
                 <div class="card-header">
@@ -342,12 +395,26 @@
         `;
         
         container.insertAdjacentHTML('beforeend', cardHtml);
+        
+        // 追加された最新のタブに表示を切り替える
+        switchTab(cardCount);
         calculate();
     }
 
     function removeCard(id) {
         const card = document.getElementById(`card_${id}`);
+        const tab = document.getElementById(`tabBtn_${id}`);
+        
         if (card) card.remove();
+        if (tab) tab.remove();
+
+        // 削除後、まだ残っている一番最後のカードをactiveにする
+        const remainingCards = document.querySelectorAll('.illustration-card');
+        if (remainingCards.length > 0) {
+            const lastCardId = remainingCards[remainingCards.length - 1].id.split('_')[1];
+            switchTab(lastCardId);
+        }
+
         calculate();
     }
 
@@ -388,130 +455,3 @@
             const id = card.id.split('_')[1];
             const baseRadio = form.elements[`base_${id}`].value;
             const bgRadio = form.elements[`bg_${id}`] ? form.elements[`bg_${id}`].value : 'none';
-            const faceDiff = parseInt(document.getElementById(`faceDiffQty_${id}`).value) || 0;
-            const poseDiff = parseInt(document.getElementById(`poseDiffQty_${id}`).value) || 0;
-            const clothDiff = parseInt(document.getElementById(`clothDiffQty_${id}`).value) || 0;
-
-            cardsData.push({
-                base: baseRadio,
-                bg: bgRadio,
-                faceDiff: faceDiff,
-                poseDiff: poseDiff,
-                clothDiff: clothDiff
-            });
-        });
-
-        // 割引などの金額計算結果をまとめてオブジェクトにする
-        const estimateSummary = {
-            cards: cardsData,
-            rawSubtotal: window.lastCalculatedRawSubtotal,
-            discountRate: window.lastCalculatedDiscountRate,
-            discountPercent: window.lastCalculatedDiscountPercent,
-            discountAmount: window.lastCalculatedDiscountAmount,
-            finalTotal: window.lastCalculatedFinalTotal
-        };
-
-        // ブラウザの一時メモリ（LocalStorage）に保存
-        localStorage.setItem('currentEstimate', JSON.stringify(estimateSummary));
-
-        // 確認画面（confirm.html）へジャンプ！
-        window.location.href = 'confirm.html';
-    };
-
-    function calculate() {
-        const form = document.getElementById('orderForm');
-        let rawSubtotal = 0; 
-        let activeCardCount = 0; 
-        let allBasesSelected = true;
-
-        const cards = document.querySelectorAll('.illustration-card');
-        if (cards.length === 0) { allBasesSelected = false; }
-
-        cards.forEach(card => {
-            const id = card.id.split('_')[1];
-            const baseRadio = form.elements[`base_${id}`].value;
-            const bgRadio = form.elements[`bg_${id}`] ? form.elements[`bg_${id}`].value : 'none';
-
-            if (!baseRadio) {
-                allBasesSelected = false;
-                return; 
-            }
-
-            activeCardCount++;
-            rawSubtotal += PRICES.base[baseRadio];
-            rawSubtotal += PRICES.bg[bgRadio];
-
-            ['faceDiff', 'poseDiff', 'clothDiff'].forEach(type => {
-                const checkbox = document.getElementById(`${type}Check_${id}`);
-                const qtyInput = document.getElementById(`${type}Qty_${id}`);
-                if (checkbox && checkbox.checked && qtyInput) {
-                    rawSubtotal += PRICES.diff[type] * parseInt(qtyInput.value);
-                }
-            });
-        });
-
-        let discountRate = 0; 
-        if (activeCardCount === 2) {
-            discountRate = 0.05; 
-        } else if (activeCardCount >= 3) {
-            discountRate = 0.10; 
-        }
-
-        const discountAmount = Math.floor(rawSubtotal * discountRate); 
-        const finalTotal = rawSubtotal - discountAmount; 
-
-        // データを移動用関数でも使えるようにwindowオブジェクトにキープしておく
-        window.lastCalculatedRawSubtotal = rawSubtotal;
-        window.lastCalculatedDiscountRate = discountRate;
-        window.lastCalculatedDiscountPercent = (discountRate * 100);
-        window.lastCalculatedDiscountAmount = discountAmount;
-        window.lastCalculatedFinalTotal = finalTotal;
-
-        const subtotalWrapper = document.getElementById('subtotalWrapper');
-        const discountWrapper = document.getElementById('discountWrapper');
-
-        if (discountRate > 0 && rawSubtotal > 0) {
-            subtotalWrapper.style.display = 'block';
-            discountWrapper.style.display = 'block';
-            document.getElementById('subtotalDisplay').innerText = rawSubtotal.toLocaleString() + " 円";
-            document.getElementById('discountPercent').innerText = (discountRate * 100).toString();
-            document.getElementById('discountDisplay').innerText = discountAmount.toLocaleString() + " 円";
-        } else {
-            subtotalWrapper.style.display = 'none';
-            discountWrapper.style.display = 'none';
-        }
-
-        document.getElementById('totalDisplay').innerText = finalTotal.toLocaleString() + " 円";
-
-        document.getElementById('addCardBtn').disabled = !allBasesSelected;
-        const submitBtn = document.getElementById('submitBtn');
-        
-        if (window.currentSiteModeIsStop) {
-            submitBtn.disabled = true;
-            submitBtn.innerText = "ORDERS CURRENTLY CLOSED";
-        } else {
-            if (allBasesSelected && finalTotal > 0) {
-                submitBtn.disabled = false;
-                submitBtn.innerText = "SEND ESTIMATION FOR CONSULTATION";
-            } else {
-                submitBtn.disabled = true;
-                submitBtn.innerText = "SELECT BASE TYPE TO PROCEED";
-            }
-        }
-    }
-
-    window.addNewCard = addNewCard;
-    window.removeCard = removeCard;
-    window.onBaseSelect = onBaseSelect;
-    window.changeQty = changeQty;
-    window.toggleQty = toggleQty;
-    window.calculate = calculate;
-
-    // ページが表示されたとき（戻るボタンで戻ってきたときも含む）に動く処理
-window.addEventListener('pageshow', function() {
-    window.scrollTo(0, 0); // ページ最上部へ強制スクロール
-});
-    
-</script>
-</body>
-</html>
