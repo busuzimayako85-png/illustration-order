@@ -77,22 +77,54 @@
         window.renderOrders = () => {
             const container = document.getElementById('orderListContainer');
             container.innerHTML = '';
+            
             const filtered = allOrders.filter(o => currentFilter === '全て' || (o.status || '未対応') === currentFilter);
             
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="no-orders">該当する依頼はありません。</div>';
+                return;
+            }
+
             filtered.forEach(data => {
                 const status = data.status || '未対応';
+                
+                // イラスト詳細の復元
+                let detailsHtml = '';
+                if (Array.isArray(data.details)) {
+                    data.details.forEach((item, idx) => {
+                        const bName = TRANSLATIONS.base[item.base] || item.base;
+                        const bgName = TRANSLATIONS.bg[item.bg] || item.bg;
+                        detailsHtml += `<div style="margin-bottom:8px;">
+                            <div class="detail-item-title">🎨 イラスト #${idx + 1}</div>
+                            <div class="detail-bullet">・ベース: ${bName}</div>
+                            <div class="detail-bullet">・背景: ${bgName}</div>
+                        </div>`;
+                    });
+                }
+
+                // メッセージの復元
+                const commentHtml = data.clientComment 
+                    ? `<div class="comment-box"><strong>💬 メッセージ:</strong><br>${data.clientComment}</div>` 
+                    : '';
+
                 container.insertAdjacentHTML('beforeend', `
                     <div class="order-card status-${status}">
                         <div class="order-header">
-                            <div><div class="name">${data.clientName}</div><div class="contact">🔑 ${data.clientContact}</div></div>
+                            <div>
+                                <div class="name">${data.clientName || '名前なし'}</div>
+                                <div class="contact">🔑 連絡先: ${data.clientContact || '未記入'}</div>
+                            </div>
                         </div>
+                        <div class="order-details-box">${detailsHtml}</div>
+                        ${commentHtml}
                         <div class="order-footer">
+                            <div class="order-total">合計: ${(data.finalTotal || 0).toLocaleString()} 円</div>
                             <div class="controls">
-                                <button class="tmpl-btn" onclick="window.copyStatusUrl('${data.id}')">🔗 URLコピー</button>
+                                <button class="tmpl-btn" style="background:#00e5ff; color:#000;" onclick="window.copyStatusUrl('${data.id}')">🔗 URLコピー</button>
                                 <select class="status-select" onchange="window.updateOrderStatus('${data.id}', this.value)">
-                                    <option value="未対応" ${status==='未対応'?'selected':''}>未対応</option>
-                                    <option value="対応中" ${status==='対応中'?'selected':''}>対応中</option>
-                                    <option value="完了" ${status==='完了'?'selected':''}>完了</option>
+                                    <option value="未対応" ${status==='未対応'?'selected':''}>🔴 未対応</option>
+                                    <option value="対応中" ${status==='対応中'?'selected':''}>🟡 対応中</option>
+                                    <option value="完了" ${status==='完了'?'selected':''}>🟢 完了</option>
                                 </select>
                                 <button class="delete-btn" onclick="window.deleteOrder('${data.id}')">削除</button>
                             </div>
