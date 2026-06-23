@@ -149,4 +149,22 @@
         <div class="section">
             <h2>① 受付状況・スケジュール</h2>
             <button class="tmpl-btn" onclick="useTemplate('現在【7月以降】受付中（残り2枠）', 'normal')">【通常】</button>
-            <button class="tmpl-btn" onclick="useTemplate('依頼停止中（8月再開予定）', 'stop')">【停止】</
+            <button class="tmpl-btn" onclick="useTemplate('依頼停止中（8月再開予定）', 'stop')">【停止】</button>
+            <input type="text" id="scheduleInput" class="input-text">
+            <label class="radio-label"><input type="radio" name="siteMode" id="modeNormal" value="normal"> 通常受付</label>
+            <label class="radio-label"><input type="radio" name="siteMode" id="modeStop" value="stop"> 依頼停止</label>
+            <button class="save-btn" onclick="updateSchedule()">更新</button>
+        </div>
+        <div class="section">
+            <h2>② 受信した相談一覧</h2>
+            <select class="status-select" style="width:100%; margin-bottom:15px;" onchange="setFilter(this.value)">
+                <option value="全て">▼ すべてのステータスを表示</option>
+                <option value="未対応">🔴 未対応のみ</option>
+                <option value="対応中">🟡 対応中のみ</option>
+                <option value="完了">🟢 完了のみ</option>
+            </select>
+            <div class="order-list" id="orderListContainer"></div>
+        </div>
+    </div>
+</body>
+</html>
