@@ -250,23 +250,21 @@
 <script>
     import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-// Firestoreのデータを監視して、変更があったら反映させる
-onSnapshot(doc(db, "settings", "schedule"), (doc) => {
-    if (doc.exists()) {
-        const data = doc.data();
-        
-        // --- ここで画面の表示を切り替えます ---
-        // 例えば、modeが 'stop' なら受付停止中、そうでなければ受付中を表示するなど
-        const statusElement = document.getElementById('statusDisplay'); // 表示したい場所のID
-        if (data.mode === 'stop') {
-            statusElement.innerText = "【現在受付停止中です】";
-            statusElement.style.color = "red";
-        } else {
-            statusElement.innerText = "【現在受付中です】";
-            statusElement.style.color = "green";
-        }
-    }
-});
+        // Firestoreのデータを監視して、変更があったら反映させる
+        onSnapshot(doc(db, "settings", "schedule"), (doc) => {
+            if (doc.exists()) {
+                const data = doc.data();
+                const statusElement = document.getElementById('currentSchedule');
+                if (data.mode === 'stop') {
+                    statusElement.innerText = "【現在受付停止中です】";
+                    statusElement.style.color = "red";
+                } else {
+                    statusElement.innerText = "【現在受付中です】";
+                    statusElement.style.color = "green";
+                }
+            }
+    });
+
 
     const PRICES = {
         base: { face: 9000, bust: 11000, full: 12000 },
