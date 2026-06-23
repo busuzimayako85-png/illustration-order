@@ -226,6 +226,7 @@
         <div class="stop-alert-box" id="stopAlertBox">
             ⚠️ 【只今、新規のご依頼を停止しております】<br>
             現在、お見積もりのシミュレーションのみご利用いただけます。再開まで今しばらくお待ちください。
+            <span id="stopComment" style="font-weight: bold; color: #ffcccc;"></span><br>
         </div>
 
         <form id="orderForm">
@@ -688,6 +689,7 @@
             // 画面の表示を切り替え
             document.getElementById('normalScheduleBox').style.display = isStop ? 'none' : 'block';
             document.getElementById('stopAlertBox').style.display = isStop ? 'block' : 'none';
+            document.getElementById('stopComment').innerText = data.text;
             
             // 文字も更新するならここ（必要に応じて）
             if (document.getElementById('currentSchedule')) {
