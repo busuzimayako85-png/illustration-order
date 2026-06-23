@@ -145,11 +145,37 @@
             text-decoration: none;
         }
         .back-link:hover { color: #fff; }
+
+        /* ─── 新設：送信完了時のポップアップ（モーダル）スタイル ─── */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 2000;
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.is-active {
+            opacity: 1; visibility: visible;
+        }
+        .modal-box {
+            width: 90%; max-width: 500px;
+            background: #111; border: 2px solid #7cfc00;
+            padding: 35px; border-radius: 6px; text-align: center;
+            box-shadow: 0 0 30px rgba(124, 252, 0, 0.3);
+        }
+        .modal-title { color: #7cfc00; font-size: 24px; margin-top: 0; letter-spacing: 1px; }
+        .url-display-area {
+            background: #000; border: 1px dashed #444; padding: 15px;
+            margin: 20px 0; border-radius: 4px; word-break: break-all;
+            color: #7cfc00; font-family: monospace; font-size: 14px;
+        }
     </style>
 </head>
 <body>
 
-<div class="confirm-container">
+<div class="confirm-container" id="mainFormContainer">
     <h1>ESTIMATION CONFIRM</h1>
     
     <p style="font-size: 13px; color: #aaa; text-align: center; margin-top: 10px;">ご選択いただいたお見積もりシミュレーションの内容です。</p>
@@ -183,12 +209,26 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="successModal">
+    <div class="modal-box">
+        <h2 class="modal-title">THANK YOU!</h2>
+        <p style="font-size: 14px; color: #fff; line-height: 1.6; margin-bottom: 20px;">
+            相談メッセージが正常に送信されました！<br>
+            毒島からの連絡を楽しみにお待ちください。
+        </p>
+        <div style="border-top: 1px solid #222; padding-top: 15px; text-align: left;">
+            <span class="input-label" style="text-align: center;">🔒 あなた専用の進捗確認URL</span>
+            <p style="font-size: 12px; color: #aaa; margin-top: 4px; text-align: center;">制作の進捗状況をいつでもこのURLからご確認いただけます。お手数ですが、ブックマークまたはコピーして保存してください。</p>
+            <div class="url-display-area" id="generatedUrl">生成中...</div>
+        </div>
+        <button type="button" class="action-btn" id="copyUrlBtn" style="background:#7cfc00; color:#000; box-shadow:0 4px 0 #54a800; margin-top: 5px;">URLをコピーして閉じる</button>
+    </div>
+</div>
+
 <script>
     function initConfirmPage() {
-        // ★修正点: localStorage から sessionStorage に変更
         const estimateDataString = sessionStorage.getItem('currentEstimate');
         if (!estimateDataString) {
-            // ローカル環境でのテスト用にダミーデータを表示
             document.getElementById('finalTotalDisplay').innerText = "24,000 円";
             document.getElementById('summaryList').innerHTML = `
                 <div class="item-row">
@@ -203,15 +243,11 @@
 
         try {
             const data = JSON.parse(estimateDataString);
-            
-            // 金額の表示
             document.getElementById('finalTotalDisplay').innerText = data.finalTotal.toLocaleString() + " 円";
 
-            // 選択された内訳テキストの作成
             const summaryList = document.getElementById('summaryList');
-            summaryList.innerHTML = ''; // クリア
+            summaryList.innerHTML = ''; 
 
-            // 各イラストカードの内訳を箇条書きで構築
             data.cards.forEach((card, index) => {
                 const row = document.createElement('div');
                 row.className = 'item-row';
@@ -234,7 +270,6 @@
                 summaryList.appendChild(row);
             });
 
-            // 割引がある場合は割引の行も追加
             if (data.discountAmount > 0) {
                 const discountRow = document.createElement('div');
                 discountRow.className = 'item-row';
@@ -256,7 +291,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-    // Firebase接続設定
     const firebaseConfig = {
         apiKey: "AIzaSyDi4twz34suKR2KXztm19FbUF-dtJN4OQU",
         authDomain: "busuzimayako85-order.firebaseapp.com",
@@ -269,7 +303,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Firebase(Firestore) へ相談データを送信する処理
     async function submitConsultation() {
         const name = document.getElementById('clientName').value.trim();
         const contact = document.getElementById('clientContact').value.trim();
@@ -281,15 +314,14 @@
         }
 
         let estimateData = { cards: [{ base: "bust", bg: "simple", faceDiff: 0, poseDiff: 0, clothDiff: 0 }], finalTotal: 2400 };
-        // ★修正点: 送信時も localStorage から sessionStorage に変更
         const estimateDataString = sessionStorage.getItem('currentEstimate');
         if (estimateDataString) {
             estimateData = JSON.parse(estimateDataString);
         }
 
         try {
-            // Firestoreへ項目を追加して保存
-            await addDoc(collection(db, "orders"), {
+            // ★ポイント：Firestoreへのデータ追加を行い、生成されたドキュメント情報を取得
+            const docRef = await addDoc(collection(db, "orders"), {
                 clientName: name,
                 clientContact: contact,
                 clientComment: comment,
@@ -299,11 +331,28 @@
                 createdAt: new Date()
             });
 
-            alert('ありがとうございます！相談メッセージが送信されました。毒島からの連絡をお待ちください。');
-            
-            // ★修正点: 送信完了後のクリーンアップも sessionStorage に
+            // ★ポイント：ドキュメントID（docRef.id）を使って専用URLを組み立てる
+            // 現在のドメインURLの配下にある「status.html」を指すように自動生成
+            const currentOrigin = window.location.origin + window.location.pathname.replace('confirm.html', '');
+            const personalStatusUrl = `${currentOrigin}status.html?id=${docRef.id}`;
+
+            // 画面のモーダル内にURLをセットして表示
+            document.getElementById('generatedUrl').innerText = personalStatusUrl;
+            document.getElementById('successModal').classList.add('is-active');
+
+            // セッションストレージのデータをクリア
             sessionStorage.removeItem('currentEstimate');
-            window.location.href = 'index.html';
+
+            // コピーボタンの挙動をセット
+            document.getElementById('copyUrlBtn').onclick = function() {
+                navigator.clipboard.writeText(personalStatusUrl).then(() => {
+                    alert('専用の進捗確認URLをコピーしました！ブックマーク等に保存してください。');
+                    window.location.href = 'index.html'; // 閉じた後にTOPへ戻す
+                }).catch(() => {
+                    alert('自動コピーに失敗しました。恐れ入りますが、画面上のURL枠を長押し・選択してコピーし、注文ページをお閉じください。');
+                    window.location.href = 'index.html';
+                });
+            };
 
         } catch (error) {
             console.error("送信エラー:", error);
