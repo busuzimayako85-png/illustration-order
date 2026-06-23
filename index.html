@@ -247,7 +247,6 @@
     </div>
 
 <script>
-    // 通信エラーでのクラッシュを防ぐため、通常の高信頼性JavaScript形式で記述しています
     const PRICES = {
         base: { face: 9000, bust: 11000, full: 12000 },
         bg: { none: 0, simple: 2000, custom: 3000, random: 6000 },
@@ -344,28 +343,56 @@
         
         container.insertAdjacentHTML('beforeend', cardHtml);
 
-        const form = document.getElementById('orderForm');
-        form.elements[`base_${currentId}`].forEach(radio => {
-            radio.addEventListener('change', () => window.onBaseSelect(currentId));
-        });
-        form.elements[`bg_${currentId}`].forEach(radio => {
-            radio.addEventListener('change', () => window.calculate());
-        });
+        // ★安全対策：完全に描画されるのを少し待つか、存在確認をしてからイベントを付ける
+        setTimeout(() => {
+            const form = document.getElementById('orderForm');
+            const baseRadios = form.elements[`base_${currentId}`];
+            if (baseRadios) {
+                // ラジオボタンがNodeListの場合と単一要素の場合のセーフティガード
+                if (baseRadios.forEach) {
+                    baseRadios.forEach(radio => radio.addEventListener('change', () => window.onBaseSelect(currentId)));
+                } else if (baseRadios.addEventListener) {
+                    baseRadios.addEventListener('change', () => window.onBaseSelect(currentId));
+                }
+            }
 
-        document.getElementById(`faceDiffCheck_${currentId}`).addEventListener('change', () => window.toggleQty(currentId, 'faceDiff'));
-        document.getElementById(`poseDiffCheck_${currentId}`).addEventListener('change', () => window.toggleQty(currentId, 'poseDiff'));
-        document.getElementById(`clothDiffCheck_${currentId}`).addEventListener('change', () => window.toggleQty(currentId, 'clothDiff'));
+            const bgRadios = form.elements[`bg_${currentId}`];
+            if (bgRadios) {
+                if (bgRadios.forEach) {
+                    bgRadios.forEach(radio => radio.addEventListener('change', () => window.calculate()));
+                } else if (bgRadios.addEventListener) {
+                    bgRadios.addEventListener('change', () => window.calculate());
+                }
+            }
 
-        document.getElementById(`faceDiffMinus_${currentId}`).addEventListener('click', () => window.changeQty(currentId, 'faceDiff', -1));
-        document.getElementById(`faceDiffPlus_${currentId}`).addEventListener('click', () => window.changeQty(currentId, 'faceDiff', 1));
-        document.getElementById(`poseDiffMinus_${currentId}`).addEventListener('click', () => window.changeQty(currentId, 'poseDiff', -1));
-        document.getElementById(`poseDiffPlus_${currentId}`).addEventListener('click', () => window.changeQty(currentId, 'poseDiff', 1));
-        document.getElementById(`clothDiffMinus_${currentId}`).addEventListener('click', () => window.changeQty(currentId, 'clothDiff', -1));
-        document.getElementById(`clothDiffPlus_${currentId}`).addEventListener('click', () => window.changeQty(currentId, 'clothDiff', 1));
+            // チェックボックスとボタンの紐付け
+            const fCheck = document.getElementById(`faceDiffCheck_${currentId}`);
+            if(fCheck) fCheck.addEventListener('change', () => window.toggleQty(currentId, 'faceDiff'));
+            const pCheck = document.getElementById(`poseDiffCheck_${currentId}`);
+            if(pCheck) pCheck.addEventListener('change', () => window.toggleQty(currentId, 'poseDiff'));
+            const cCheck = document.getElementById(`clothDiffCheck_${currentId}`);
+            if(cCheck) cCheck.addEventListener('change', () => window.toggleQty(currentId, 'clothDiff'));
 
-        if (currentId > 1) {
-            document.getElementById(`removeBtn_${currentId}`).addEventListener('click', () => window.removeCard(currentId));
-        }
+            const fMinus = document.getElementById(`faceDiffMinus_${currentId}`);
+            if(fMinus) fMinus.addEventListener('click', () => window.changeQty(currentId, 'faceDiff', -1));
+            const fPlus = document.getElementById(`faceDiffPlus_${currentId}`);
+            if(fPlus) fPlus.addEventListener('click', () => window.changeQty(currentId, 'faceDiff', 1));
+            
+            const pMinus = document.getElementById(`poseDiffMinus_${currentId}`);
+            if(pMinus) pMinus.addEventListener('click', () => window.changeQty(currentId, 'poseDiff', -1));
+            const pPlus = document.getElementById(`poseDiffPlus_${currentId}`);
+            if(pPlus) pPlus.addEventListener('click', () => window.changeQty(currentId, 'poseDiff', 1));
+
+            const cMinus = document.getElementById(`clothDiffMinus_${currentId}`);
+            if(cMinus) cMinus.addEventListener('click', () => window.changeQty(currentId, 'clothDiff', -1));
+            const cPlus = document.getElementById(`clothDiffPlus_${currentId}`);
+            if(cPlus) cPlus.addEventListener('click', () => window.changeQty(currentId, 'clothDiff', 1));
+
+            if (currentId > 1) {
+                const remBtn = document.getElementById(`removeBtn_${currentId}`);
+                if(remBtn) remBtn.addEventListener('click', () => window.removeCard(currentId));
+            }
+        }, 10);
         
         window.switchTab(currentId);
         window.calculate();
@@ -393,8 +420,9 @@
 
     window.changeQty = function(id, type, val) {
         const checkbox = document.getElementById(`${type}Check_${id}`);
-        if (!checkbox.checked) return;
+        if (!checkbox || !checkbox.checked) return;
         const input = document.getElementById(`${type}Qty_${id}`);
+        if (!input) return;
         let current = parseInt(input.value) + val;
         if (current < 0) current = 0;
         input.value = current;
@@ -404,6 +432,7 @@
     window.toggleQty = function(id, type) {
         const checkbox = document.getElementById(`${type}Check_${id}`);
         const input = document.getElementById(`${type}Qty_${id}`);
+        if (!checkbox || !input) return;
         if (!checkbox.checked) { input.value = 0; } 
         else if (input.value == 0) { input.value = 1; }
         window.calculate();
@@ -417,24 +446,31 @@
 
         cards.forEach(card => {
             const id = card.id.split('_')[1];
-            const baseRadio = form.elements[`base_${id}`].value;
+            const baseRadio = form.elements[`base_${id}`] ? form.elements[`base_${id}`].value : '';
             const bgRadio = form.elements[`bg_${id}`] ? form.elements[`bg_${id}`].value : 'none';
-            const faceDiff = parseInt(document.getElementById(`faceDiffQty_${id}`).value) || 0;
-            const poseDiff = parseInt(document.getElementById(`poseDiffQty_${id}`).value) || 0;
-            const clothDiff = parseInt(document.getElementById(`clothDiffQty_${id}`).value) || 0;
+            
+            const fQtyEl = document.getElementById(`faceDiffQty_${id}`);
+            const pQtyEl = document.getElementById(`poseDiffQty_${id}`);
+            const cQtyEl = document.getElementById(`clothDiffQty_${id}`);
 
-            cardsData.push({
-                base: baseRadio, bg: bgRadio, faceDiff: faceDiff, poseDiff: poseDiff, clothDiff: clothDiff
-            });
+            const faceDiff = fQtyEl ? (parseInt(fQtyEl.value) || 0) : 0;
+            const poseDiff = pQtyEl ? (parseInt(pQtyEl.value) || 0) : 0;
+            const clothDiff = cQtyEl ? (parseInt(cQtyEl.value) || 0) : 0;
+
+            if(baseRadio) {
+                cardsData.push({
+                    base: baseRadio, bg: bgRadio, faceDiff: faceDiff, poseDiff: poseDiff, clothDiff: clothDiff
+                });
+            }
         });
 
         const estimateSummary = {
             cards: cardsData,
-            rawSubtotal: window.lastCalculatedRawSubtotal,
-            discountRate: window.lastCalculatedDiscountRate,
-            discountPercent: window.lastCalculatedDiscountPercent,
-            discountAmount: window.lastCalculatedDiscountAmount,
-            finalTotal: window.lastCalculatedFinalTotal
+            rawSubtotal: window.lastCalculatedRawSubtotal || 0,
+            discountRate: window.lastCalculatedDiscountRate || 0,
+            discountPercent: window.lastCalculatedDiscountPercent || 0,
+            discountAmount: window.lastCalculatedDiscountAmount || 0,
+            finalTotal: window.lastCalculatedFinalTotal || 0
         };
 
         localStorage.setItem('currentEstimate', JSON.stringify(estimateSummary));
@@ -452,7 +488,7 @@
 
         cards.forEach(card => {
             const id = card.id.split('_')[1];
-            const baseRadio = form.elements[`base_${id}`].value;
+            const baseRadio = form.elements[`base_${id}`] ? form.elements[`base_${id}`].value : '';
             const bgRadio = form.elements[`bg_${id}`] ? form.elements[`bg_${id}`].value : 'none';
 
             if (!baseRadio) {
@@ -461,14 +497,13 @@
             }
 
             activeCardCount++;
-            rawSubtotal += PRICES.base[baseRadio];
-            rawSubtotal += PRICES.bg[bgRadio];
+            rawSubtotal += PRICES.base[baseRadio] || 0;
+            rawSubtotal += PRICES.bg[bgRadio] || 0;
 
             ['faceDiff', 'poseDiff', 'clothDiff'].forEach(type => {
-                const checkbox = document.getElementById(`${type}Check_${id}`);
                 const qtyInput = document.getElementById(`${type}Qty_${id}`);
-                if (checkbox && checkbox.checked && qtyInput) {
-                    rawSubtotal += PRICES.diff[type] * parseInt(qtyInput.value);
+                if (qtyInput) {
+                    rawSubtotal += (PRICES.diff[type] || 0) * (parseInt(qtyInput.value) || 0);
                 }
             });
         });
@@ -477,4 +512,60 @@
         if (activeCardCount === 2) { discountRate = 0.05; } 
         else if (activeCardCount >= 3) { discountRate = 0.10; }
 
-        const
+        const discountAmount = Math.floor(rawSubtotal * discountRate); 
+        const finalTotal = rawSubtotal - discountAmount; 
+
+        window.lastCalculatedRawSubtotal = rawSubtotal;
+        window.lastCalculatedDiscountRate = discountRate;
+        window.lastCalculatedDiscountPercent = (discountRate * 100);
+        window.lastCalculatedDiscountAmount = discountAmount;
+        window.lastCalculatedFinalTotal = finalTotal;
+
+        const subtotalWrapper = document.getElementById('subtotalWrapper');
+        const discountWrapper = document.getElementById('discountWrapper');
+
+        if (discountRate > 0 && rawSubtotal > 0) {
+            if(subtotalWrapper) subtotalWrapper.style.display = 'block';
+            if(discountWrapper) discountWrapper.style.display = 'block';
+            document.getElementById('subtotalDisplay').innerText = rawSubtotal.toLocaleString() + " 円";
+            document.getElementById('discountPercent').innerText = (discountRate * 100).toString();
+            document.getElementById('discountDisplay').innerText = discountAmount.toLocaleString() + " 円";
+        } else {
+            if(subtotalWrapper) subtotalWrapper.style.display = 'none';
+            if(discountWrapper) discountWrapper.style.display = 'none';
+        }
+
+        document.getElementById('totalDisplay').innerText = finalTotal.toLocaleString() + " 円";
+        document.getElementById('addCardBtn').disabled = !allBasesSelected;
+        
+        const submitBtn = document.getElementById('submitBtn');
+        if (window.currentSiteModeIsStop) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = "ORDERS CURRENTLY CLOSED";
+        } else {
+            if (allBasesSelected && finalTotal > 0) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "SEND ESTIMATION FOR CONSULTATION";
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.innerText = "SELECT BASE TYPE TO PROCEED";
+            }
+        }
+    };
+
+    document.getElementById('addCardBtn').addEventListener('click', window.addNewCard);
+    document.getElementById('orderForm').addEventListener('submit', window.goToConfirmPage);
+
+    // 初回のカード生成
+    window.addNewCard();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('mode') === 'stop') {
+        window.currentSiteModeIsStop = true;
+        document.getElementById('normalScheduleBox').style.display = 'none';
+        document.getElementById('stopAlertBox').style.display = 'block';
+        window.calculate();
+    }
+</script>
+</body>
+</html>
