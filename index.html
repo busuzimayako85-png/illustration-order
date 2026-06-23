@@ -225,8 +225,8 @@
 
         <div class="stop-alert-box" id="stopAlertBox">
             ⚠️ 【只今、新規のご依頼を停止しております】<br>
-            現在、お見積もりのシミュレーションのみご利用いただけます。再開まで今しばらくお待ちください。
-            <span id="stopComment" style="font-weight: bold; color: #ffcccc;"></span><br>
+            現在、お見積もりのシミュレーションのみご利用いただけます。再開まで今しばらくお待ちください。<br>
+            <span id="stopComment" style="font-weight: bold; color: #ffcccc;"></span>
         </div>
 
         <form id="orderForm">
@@ -685,32 +685,22 @@
         if (docSnap.exists()) {
             const data = docSnap.data();
             const isStop = (data.mode === 'stop');
-        
-            // 1. 画面の表示を切り替え
+            
+            // 画面の表示を切り替え
             document.getElementById('normalScheduleBox').style.display = isStop ? 'none' : 'block';
             document.getElementById('stopAlertBox').style.display = isStop ? 'block' : 'none';
-        
-            // 2. 停止中モードの時の処理
-            if (isStop) {
-                const stopCommentEl = document.getElementById('stopComment');
-                // 要素が存在する場合のみ文字を入れる（エラー防止）
-                if (stopCommentEl) {
-                    stopCommentEl.innerText = data.text;
-                }
-                // システムを停止状態にする
-                window.currentSiteModeIsStop = true;
-            } 
-            // 3. 受付中モードの時の処理
-            else {
-                const currentScheduleEl = document.getElementById('currentSchedule');
-                if (currentScheduleEl) {
-                    currentScheduleEl.innerText = data.text;
-                }
-                window.currentSiteModeIsStop = false;
+            
+            
+            // 文字も更新するならここ（必要に応じて）
+            if (document.getElementById('currentSchedule')) {
+                document.getElementById('currentSchedule').innerText = data.text;
             }
 
-            // 4. 再計算
-            window.calculate(); 
+            // システムを停止状態にする
+            if (isStop) {
+                window.currentSiteModeIsStop = true;
+                window.calculate(); // 再計算してボタンを無効化
+            }
         }
     });
 </script>
