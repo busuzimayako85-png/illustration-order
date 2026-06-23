@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMERGENCY TEST SITE</title>
+    <style>
+        body {
+            background-color: #0b0b0b;
+            color: #f0f0f0;
+            font-family: sans-serif;
+            margin: 0;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .test-box {
+            background: #111;
+            border: 2px dashed #7cfc00;
+            padding: 40px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(124, 252, 0, 0.2);
+            max-width: 500px;
+        }
+        h1 { color: #7cfc00; margin-top: 0; }
+        button {
+            background: #ff0055;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+        button:hover { background: #ff266f; }
+    </style>
+</head>
+<body>
+
+    <div class="test-box">
+        <h1>HTML DISPLAY TEST</h1>
+        <p>この画面が見えていれば、ブラウザもエディタも正常に動作しています！</p>
+        <p>下のボタンを押してアラートが出るか確認してください。</p>
+        <button onclick="alert('JavaScriptも正常に動いています！')">動作確認ボタン</button>
+    </div>
+
+</body>
+</html>
