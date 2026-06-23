@@ -247,11 +247,7 @@
         </form>
     </div>
 
-<script type="module">
-    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-    const db = getFirestore();
-    
-
+<script>
     const PRICES = {
         base: { face: 9000, bust: 11000, full: 12000 },
         bg: { none: 0, simple: 2000, custom: 3000, random: 6000 },
@@ -659,21 +655,25 @@
 
     window.loadSavedEstimate();
 
-    onSnapshot(doc(db, "settings", "schedule"), (docSnap) => {
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            const isStop = (data.mode === 'stop');
-            
-            // 画面の表示を切り替える
-            document.getElementById('normalScheduleBox').style.display = isStop ? 'none' : 'block';
-            document.getElementById('stopAlertBox').style.display = isStop ? 'block' : 'none';
-            
-            // 受付テキストを更新
-            document.getElementById('currentSchedule').innerText = data.text;
-            
-            // システムの停止フラグを更新して再計算
-            window.currentSiteModeIsStop = isStop;
-            window.calculate();
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('mode') === 'stop') {
+        window.currentSiteModeIsStop = true;
+        document.getElementById('normalScheduleBox').style.display = 'none';
+        document.getElementById('stopAlertBox').style.display = 'block';
+        window.calculate();
+    }
+
+    // ページを開いた時に、一度だけFirebaseの設定を見に行く
+    getDoc(doc(db, "settings", "schedule")).then((s) => {
+        if(s.exists()){
+            const data = s.data();
+            if(data.mode === 'stop') {
+                document.getElementById('normalScheduleBox').style.display = 'none';
+                document.getElementById('stopAlertBox').style.display = 'block';
+            } else {
+                document.getElementById('normalScheduleBox').style.display = 'block';
+                document.getElementById('stopAlertBox').style.display = 'none';
+            }
         }
     });
 </script>
