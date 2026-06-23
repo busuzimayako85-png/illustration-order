@@ -72,9 +72,8 @@
         window.setFilter = (v) => { currentFilter = v; render(); };
 
         window.copyStatusUrl = (id) => {
-            // URLのドメイン部分は現在の環境に合わせてください
-            const url = `https://busuzimayako85-order.web.app/status.html?id=${id}`;
-            navigator.clipboard.writeText(url).then(() => alert("URLをコピーしました！"));
+        const url = `https://illustration-order-cwby.vercel.app/status.html?id=${id}`;
+        navigator.clipboard.writeText(url).then(() => alert("URLをコピーしました！"));
         };
 
         function render() {
