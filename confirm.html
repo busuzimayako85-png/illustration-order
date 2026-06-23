@@ -185,7 +185,8 @@
 
 <script>
     function initConfirmPage() {
-        const estimateDataString = localStorage.getItem('currentEstimate');
+        // ★修正点: localStorage から sessionStorage に変更
+        const estimateDataString = sessionStorage.getItem('currentEstimate');
         if (!estimateDataString) {
             // ローカル環境でのテスト用にダミーデータを表示
             document.getElementById('finalTotalDisplay').innerText = "24,000 円";
@@ -272,7 +273,7 @@
     async function submitConsultation() {
         const name = document.getElementById('clientName').value.trim();
         const contact = document.getElementById('clientContact').value.trim();
-        const comment = document.getElementById('clientComment').value.trim(); // ★追加項目
+        const comment = document.getElementById('clientComment').value.trim();
 
         if (!name || !contact) {
             alert('お名前とご連絡先は必須入力です！');
@@ -280,7 +281,8 @@
         }
 
         let estimateData = { cards: [{ base: "bust", bg: "simple", faceDiff: 0, poseDiff: 0, clothDiff: 0 }], finalTotal: 2400 };
-        const estimateDataString = localStorage.getItem('currentEstimate');
+        // ★修正点: 送信時も localStorage から sessionStorage に変更
+        const estimateDataString = sessionStorage.getItem('currentEstimate');
         if (estimateDataString) {
             estimateData = JSON.parse(estimateDataString);
         }
@@ -290,7 +292,7 @@
             await addDoc(collection(db, "orders"), {
                 clientName: name,
                 clientContact: contact,
-                clientComment: comment,               // ★新しく保存するフリーコメント
+                clientComment: comment,
                 details: estimateData.cards,
                 finalTotal: estimateData.finalTotal,
                 status: "未対応",
@@ -299,7 +301,8 @@
 
             alert('ありがとうございます！相談メッセージが送信されました。毒島からの連絡をお待ちください。');
             
-            localStorage.removeItem('currentEstimate');
+            // ★修正点: 送信完了後のクリーンアップも sessionStorage に
+            sessionStorage.removeItem('currentEstimate');
             window.location.href = 'index.html';
 
         } catch (error) {
