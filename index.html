@@ -253,21 +253,55 @@
         diff: { faceDiff: 500, poseDiff: 700, clothDiff: 1000 }
     };
 
-    let cardCount = 0;
+    let uniqueIdCounter = 0; // システム内部追跡用のユニークなID（リセット・繰り上げで破綻しないため）
     window.currentSiteModeIsStop = false;
 
-    window.switchTab = function(targetId) {
+    window.switchTab = function(targetUniqueId) {
         document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.illustration-card').forEach(card => card.classList.remove('active'));
 
-        const targetTab = document.getElementById(`tabBtn_${targetId}`);
-        const targetCard = document.getElementById(`card_${targetId}`);
+        const targetTab = document.getElementById(`tabBtn_${targetUniqueId}`);
+        const targetCard = document.getElementById(`card_${targetUniqueId}`);
         if(targetTab) targetTab.classList.add('active');
         if(targetCard) targetCard.classList.add('active');
     };
 
+    // タブ名とカード内の見出しの番号(1, 2, 3...)を常に綺麗に整列し直すファンクション
+    window.refreshTabNumbers = function() {
+        const cards = document.querySelectorAll('.illustration-card');
+        cards.forEach((card, index) => {
+            const currentUniqueId = card.id.split('_')[1];
+            const displayNum = index + 1; // 1ベースの番号
+
+            // タブのテキストを更新
+            const tabBtn = document.getElementById(`tabBtn_${currentUniqueId}`);
+            if (tabBtn) {
+                tabBtn.innerText = `ILLUSTRATION #${displayNum}`;
+            }
+
+            // カード内のタイトルテキストを更新
+            const cardTitle = card.querySelector('.card-title');
+            if (cardTitle) {
+                cardTitle.innerText = `ILLUSTRATION #${displayNum} (${displayNum}枚目)`;
+            }
+
+            // 1枚目になったカードからは削除ボタンを消し、2枚目以降には削除ボタンを付与
+            const header = card.querySelector('.card-header');
+            let removeBtn = document.getElementById(`removeBtn_${currentUniqueId}`);
+            
+            if (displayNum === 1) {
+                if (removeBtn) removeBtn.remove();
+            } else {
+                if (!removeBtn) {
+                    const btnHtml = `<button type="button" class="remove-card-btn" id="removeBtn_${currentUniqueId}">REMOVE (削除)</button>`;
+                    header.insertAdjacentHTML('beforeend', btnHtml);
+                    document.getElementById(`removeBtn_${currentUniqueId}`).addEventListener('click', () => window.removeCard(currentUniqueId));
+                }
+            }
+        });
+    };
+
     window.bindCardEvents = function(id) {
-        // ラジオボタンの変更イベントを、name属性ベースではなく各IDに対して直接安全に紐付ける形に変更
         ['face', 'bust', 'full'].forEach(val => {
             document.getElementById(`base_${val}_${id}`)?.addEventListener('change', () => window.onBaseSelect(id));
         });
@@ -286,81 +320,78 @@
         document.getElementById(`poseDiffPlus_${id}`)?.addEventListener('click', () => window.changeQty(id, 'poseDiff', 1));
         document.getElementById(`clothDiffMinus_${id}`)?.addEventListener('click', () => window.changeQty(id, 'clothDiff', -1));
         document.getElementById(`clothDiffPlus_${id}`)?.addEventListener('click', () => window.changeQty(id, 'clothDiff', 1));
-
-        if (id > 1) {
-            document.getElementById(`removeBtn_${id}`)?.addEventListener('click', () => window.removeCard(id));
-        }
     };
 
     window.addNewCard = function() {
-        cardCount++;
+        uniqueIdCounter++;
+        const currentId = uniqueIdCounter;
+        
         const container = document.getElementById('illustrationContainer');
         const tabWrapper = document.getElementById('tabWrapper');
         
-        const tabHtml = `<button type="button" class="tab-button" id="tabBtn_${cardCount}">ILLUSTRATION #${cardCount}</button>`;
+        // 最初は仮テキストで追加（直後のrefreshTabNumbersで正しい連番になる）
+        const tabHtml = `<button type="button" class="tab-button" id="tabBtn_${currentId}">ILLUSTRATION</button>`;
         tabWrapper.insertAdjacentHTML('beforeend', tabHtml);
 
-        const currentId = cardCount;
         document.getElementById(`tabBtn_${currentId}`).addEventListener('click', () => {
             window.switchTab(currentId);
         });
 
         const cardHtml = `
-            <div class="illustration-card" id="card_${cardCount}">
+            <div class="illustration-card" id="card_${currentId}">
                 <div class="card-header">
-                    <h3 class="card-title">ILLUSTRATION #${cardCount} (${cardCount}枚目)</h3>
-                    ${cardCount > 1 ? `<button type="button" class="remove-card-btn" id="removeBtn_${cardCount}">REMOVE (削除)</button>` : ''}
+                    <h3 class="card-title">ILLUSTRATION</h3>
                 </div>
 
                 <div class="section-title">01. SELECT BASE TYPE (必須)</div>
                 <div class="form-group">
-                    <label><input type="radio" name="base_${cardCount}" value="face" id="base_face_${cardCount}"> <span>フェイスアップ</span> <span class="price-text">9,000円</span></label>
+                    <label><input type="radio" name="base_${currentId}" value="face" id="base_face_${currentId}"> <span>フェイスアップ</span> <span class="price-text">9,000円</span></label>
                 </div>
                 <div class="form-group">
-                    <label><input type="radio" name="base_${cardCount}" value="bust" id="base_bust_${cardCount}"> <span>バストアップ</span> <span class="price-text">11,000円</span></label>
+                    <label><input type="radio" name="base_${currentId}" value="bust" id="base_bust_${currentId}"> <span>バストアップ</span> <span class="price-text">11,000円</span></label>
                 </div>
                 <div class="form-group">
-                    <label><input type="radio" name="base_${cardCount}" value="full" id="base_full_${cardCount}"> <span>全身</span> <span class="price-text">12,000円</span></label>
+                    <label><input type="radio" name="base_${currentId}" value="full" id="base_full_${currentId}"> <span>全身</span> <span class="price-text">12,000円</span></label>
                 </div>
 
-                <div class="options-wrapper locked" id="optionsWrapper_${cardCount}">
+                <div class="options-wrapper locked" id="optionsWrapper_${currentId}">
                     <div class="section-title">02. BACKGROUND OPTIONS (任意)</div>
                     <div class="form-group">
-                        <label><input type="radio" name="bg_${cardCount}" value="none" id="bg_none_${cardCount}" checked> <span>背景なし (単色/透過/グラデ)</span> <span class="price-text">+0円</span></label>
+                        <label><input type="radio" name="bg_${currentId}" value="none" id="bg_none_${currentId}" checked> <span>背景なし (単色/透過/グラデ)</span> <span class="price-text">+0円</span></label>
                     </div>
                     <div class="form-group">
-                        <label><input type="radio" name="bg_${cardCount}" value="simple" id="bg_simple_${cardCount}"> <span>簡易背景 (パターン/エフェクト)</span> <span class="price-text">+2,000円</span></label>
+                        <label><input type="radio" name="bg_${currentId}" value="simple" id="bg_simple_${currentId}"> <span>簡易背景 (パターン/エフェクト)</span> <span class="price-text">+2,000円</span></label>
                     </div>
                     <div class="form-group">
-                        <label><input type="radio" name="bg_${cardCount}" value="custom" id="bg_custom_${cardCount}"> <span>しっかり背景: 構図指定あり</span> <span class="price-text">+3,000円</span></label>
+                        <label><input type="radio" name="bg_${currentId}" value="custom" id="bg_custom_${currentId}"> <span>しっかり背景: 構図指定あり</span> <span class="price-text">+3,000円</span></label>
                     </div>
                     <div class="form-group">
-                        <label><input type="radio" name="bg_${cardCount}" value="random" id="bg_random_${cardCount}"> <span>しっかり背景: おまかせ (構図考案料込)</span> <span class="price-text">+6,000円</span></label>
+                        <label><input type="radio" name="bg_${currentId}" value="random" id="bg_random_${currentId}"> <span>しっかり背景: おまかせ (構図考案料込)</span> <span class="price-text">+6,000円</span></label>
                     </div>
 
                     <div class="section-title">03. ADDITIONAL OPTIONS (任意)</div>
                     <div class="form-group">
-                        <label><input type="checkbox" id="faceDiffCheck_${cardCount}"> <span>表情差分</span> <span class="price-text">+500円 / 枚</span></label>
+                        <label><input type="checkbox" id="faceDiffCheck_${currentId}"> <span>表情差分</span> <span class="price-text">+500円 / 枚</span></label>
                         <div class="qty-container">
-                            <button type="button" class="qty-btn" id="faceDiffMinus_${cardCount}">-</button>
-                            <input type="text" id="faceDiffQty_${cardCount}" class="qty-input" value="0" readonly>
-                            <button type="button" class="qty-btn" id="faceDiffPlus_${cardCount}">+</button>
+                            <button type="button" class="qty-btn" id="faceDiffMinus_${currentId}">-</button>
+                            <input type="text" id="faceDiffQty_${currentId}" class="qty-input" value="0" readonly>
+                            <button type="button" class="qty-btn" id="faceDiffPlus_${currentId}">+</button>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label><input type="checkbox" id="poseDiffCheck_${cardCount}"> <span>ポーズ差分</span> <span class="price-text">+700円 / 枚</span></label>
+                        <label><input type="checkbox" id="poseDiffCheck_${currentId}"> <span>ポーズ差分</span> <span class="price-text">+700円 / 枚</span></label>
                         <div class="qty-container">
-                            <button type="button" class="qty-btn" id="poseDiffMinus_${cardCount}">-</button>
-                            <input type="text" id="poseDiffQty_${cardCount}" class="qty-input" value="0" readonly>
-                            <button type="button" class="qty-btn" id="poseDiffPlus_${cardCount}">+</button>
+                            <button type="button" class="qty-btn" id="poseDiffMinus_${currentId}">-</button>
+                            <input type="text" id="poseDiffQty_${currentId}" class="qty-input" value="0" readonly>
+                            <button type="button" class="qty-btn" id="poseDiffPlus_${currentId}">+</button>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label><input type="checkbox" id="clothDiffCheck_${cardCount}"> <span>服装差分</span> <span class="price-text">+1,000円 / 枚</span></label>
+                        <label><input type="checkbox" id="clothDiffCheck_${currentId}"> <span>服装差分</span> <span class="price-text">+1,000円 / 枚</span></label>
                         <div class="qty-container">
-                            <button type="button" class="qty-btn" id="clothDiffMinus_${cardCount}">-</button>
-                            <input type="text" id="clothDiffQty_${cardCount}" class="qty-input" value="0" readonly>
-                            <button type="button" class="qty-btn" id="clothDiffPlus_${cardCount}">+</button>
+                            <button type="button" class="qty-btn" id="clothDiffMinus_${currentId}">-</button>
+                            <input type="text" id="clothDiffQty_${currentId}" class="qty-input" value="0" readonly>
+                            <button type="button" class="qty-btn" id="clothDiffPlus_${currentId}">+</button>
                         </div>
                     </div>
                 </div>
@@ -369,6 +400,9 @@
         
         container.insertAdjacentHTML('beforeend', cardHtml);
         window.bindCardEvents(currentId);
+        
+        // ナンバリングを再計算
+        window.refreshTabNumbers();
         window.switchTab(currentId);
         window.calculate();
     };
@@ -379,10 +413,13 @@
         if (card) card.remove();
         if (tab) tab.remove();
 
+        // 削除後にナンバリングをすべて綺麗に1から詰め直す
+        window.refreshTabNumbers();
+
         const remainingCards = document.querySelectorAll('.illustration-card');
         if (remainingCards.length > 0) {
-            const lastCardId = remainingCards[remainingCards.length - 1].id.split('_')[1];
-            window.switchTab(lastCardId);
+            const lastCardUniqueId = remainingCards[remainingCards.length - 1].id.split('_')[1];
+            window.switchTab(lastCardUniqueId);
         }
         window.calculate();
     };
@@ -421,7 +458,6 @@
         cards.forEach(card => {
             const id = card.id.split('_')[1];
             
-            // 安全な値取得に変更
             let baseValue = '';
             ['face', 'bust', 'full'].forEach(v => {
                 if(document.getElementById(`base_${v}_${id}`)?.checked) baseValue = v;
@@ -580,7 +616,12 @@
             });
         });
 
-        window.switchTab(1);
+        // 復元後、1枚目のタブを選択状態に
+        const remainingCards = document.querySelectorAll('.illustration-card');
+        if (remainingCards.length > 0) {
+            const firstCardUniqueId = remainingCards[0].id.split('_')[1];
+            window.switchTab(firstCardUniqueId);
+        }
         window.calculate();
     };
 
