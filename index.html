@@ -148,4 +148,463 @@
 
         /* スケジュール案内・アラート */
         .schedule-box { background: #151515; border: 1px solid #333; padding: 20px; border-radius: 4px; margin-bottom: 30px; }
-        .stop-alert-box { display: none; background: #2a0000; border: 2px solid #ff0000; color: #ff3333; padding: 15px; border-radius: 4px; margin-bottom: 30
+        .stop-alert-box { display: none; background: #2a0000; border: 2px solid #ff0000; color: #ff3333; padding: 15px; border-radius: 4px; margin-bottom: 30px; font-weight: bold; text-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
+
+        /* 選択項目のスタイル */
+        .form-group { margin-bottom: 10px; }
+        label { display: flex; align-items: center; cursor: pointer; padding: 12px 15px; background: #161616; border-radius: 4px; border: 1px solid #222; font-size: 14px; }
+        label:hover { background: #222; border-color: #ff0055; }
+        input[type="radio"]:checked + span, input[type="checkbox"]:checked + span { color: #7cfc00; text-shadow: 0 0 8px rgba(124, 252, 0, 0.6); }
+        .price-text { margin-left: auto; color: #888; font-weight: bold; }
+
+        /* 数量コントロール */
+        .qty-container { display: flex; align-items: center; margin-top: 8px; padding-left: 30px; }
+        .qty-btn { background: #222; color: #fff; border: 1px solid #444; width: 28px; height: 28px; cursor: pointer; font-weight: bold; }
+        .qty-btn:hover { background: #ff0055; border-color: #ff0055; }
+        .qty-input { width: 40px; text-align: center; background: #000; color: #7cfc00; border: 1px solid #333; height: 26px; font-size: 14px; }
+
+        /* ボタンデザイン */
+        .add-card-btn {
+            width: 100%;
+            background: #000;
+            color: #7cfc00;
+            border: 2px dashed #7cfc00;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        .add-card-btn:hover { background: #7cfc00; color: #000; box-shadow: 0 0 15px rgba(124, 252, 0, 0.4); }
+        .add-card-btn:disabled { opacity: 0.3; cursor: not-allowed; background: none !important; color: #444 !important; border-color: #444 !important; box-shadow: none !important; }
+
+        /* 金額表示ボックス */
+        .total-box {
+            margin-top: 40px;
+            padding: 30px;
+            background: #1a0007;
+            border: 2px solid #ff0055;
+            border-radius: 4px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
+        }
+        .subtotal-text { font-size: 14px; color: #888; margin-bottom: 5px; }
+        .discount-text { font-size: 15px; color: #7cfc00; font-weight: bold; margin-bottom: 15px; text-shadow: 0 0 5px rgba(124, 252, 0, 0.5); }
+        .total-price { font-size: 42px; font-weight: bold; color: #ff0055; text-shadow: 0 0 15px rgba(255, 0, 85, 0.8); }
+        
+        .submit-btn { width: 100%; background: #ff0055; color: white; border: none; padding: 20px; font-size: 20px; font-weight: bold; letter-spacing: 2px; cursor: pointer; margin-top: 25px; box-shadow: 0 4px 0 #b3003b; }
+        .submit-btn:hover { background: #ff266f; box-shadow: 0 0 15px rgba(255, 0, 85, 0.6); }
+        .submit-btn:disabled { background: #222 !important; color: #555 !important; box-shadow: none !important; cursor: not-allowed !important; }
+
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            .left-panel { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 4px solid #ff0055; padding: 40px 20px; }
+            .right-panel { width: 100%; margin-left: 0; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="left-panel">
+        <div class="logo-area">
+            <p style="padding: 20px; font-size: 14px;">[ ここにロゴ画像 <br>image_64c9bf.jpg が<br>大きく表示されます ]</p>
+        </div>
+        <div class="info-text">busuzimayako85</div>
+        <div style="font-size: 12px; color: #666;">ILLUSTRATION ONLINE ORDER SYSTEM</div>
+    </div>
+
+    <div class="right-panel">
+        <h1 style="margin-top: 0; font-size: 32px; letter-spacing: 2px;">ORDER & ESTIMATION</h1>
+        
+        <div class="schedule-box" id="normalScheduleBox">
+            <span style="color: #ff0055; font-weight: bold;">【NOTICE】</span> 
+            <span id="currentSchedule">現在【7月以降】受付中（残り2枠）</span>
+        </div>
+
+        <div class="stop-alert-box" id="stopAlertBox">
+            ⚠️ 【只今、新規のご依頼を停止しております】<br>
+            現在、お見積もりのシミュレーションのみご利用いただけます。再開まで今しばらくお待ちください。
+        </div>
+
+        <form id="orderForm">
+            <!-- タブコンテナ -->
+            <div class="tab-wrapper" id="tabWrapper"></div>
+
+            <div id="illustrationContainer"></div>
+
+            <button type="button" id="addCardBtn" class="add-card-btn">+ ADD ANOTHER ILLUSTRATION (枚数を追加する)</button>
+
+            <div class="total-box">
+                <div class="subtotal-text" id="subtotalWrapper" style="display:none;">SUBTOTAL (小計): <span id="subtotalDisplay">0 円</span></div>
+                <div class="discount-text" id="discountWrapper" style="display:none;">MULTIPLE DISCOUNT (<span id="discountPercent">0</span>% OFF): -<span id="discountDisplay">0 円</span></div>
+                <div style="font-size: 13px; letter-spacing: 1px; color: #aaa;">ESTIMATED TOTAL (最終合計金額)</div>
+                <div class="total-price" id="totalDisplay">0 円</div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="submit-btn" disabled>SEND ESTIMATION FOR CONSULTATION</button>
+        </form>
+    </div>
+
+<script>
+    const PRICES = {
+        base: { face: 9000, bust: 11000, full: 12000 },
+        bg: { none: 0, simple: 2000, custom: 3000, random: 6000 },
+        diff: { faceDiff: 500, poseDiff: 700, clothDiff: 1000 }
+    };
+
+    let cardCount = 0;
+    window.currentSiteModeIsStop = false;
+
+    window.switchTab = function(targetId) {
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.illustration-card').forEach(card => card.classList.remove('active'));
+
+        const targetTab = document.getElementById(`tabBtn_${targetId}`);
+        const targetCard = document.getElementById(`card_${targetId}`);
+        if(targetTab) targetTab.classList.add('active');
+        if(targetCard) targetCard.classList.add('active');
+    };
+
+    // イベント登録関数を分離し、カード作成直後に「直接」紐付け（タイマーバグを徹底排除）
+    window.bindCardEvents = function(id) {
+        const form = document.getElementById('orderForm');
+        
+        // ベースラジオ
+        const baseRadios = form.elements[`base_${id}`];
+        if (baseRadios) {
+            if (baseRadios.forEach) {
+                baseRadios.forEach(radio => radio.addEventListener('change', () => window.onBaseSelect(id)));
+            } else {
+                baseRadios.addEventListener('change', () => window.onBaseSelect(id));
+            }
+        }
+
+        // 背景ラジオ
+        const bgRadios = form.elements[`bg_${id}`];
+        if (bgRadios) {
+            if (bgRadios.forEach) {
+                bgRadios.forEach(radio => radio.addEventListener('change', () => window.calculate()));
+            } else {
+                bgRadios.addEventListener('change', () => window.calculate());
+            }
+        }
+
+        // チェックボックスとボタン
+        document.getElementById(`faceDiffCheck_${id}`)?.addEventListener('change', () => window.toggleQty(id, 'faceDiff'));
+        document.getElementById(`poseDiffCheck_${id}`)?.addEventListener('change', () => window.toggleQty(id, 'poseDiff'));
+        document.getElementById(`clothDiffCheck_${id}`)?.addEventListener('change', () => window.toggleQty(id, 'clothDiff'));
+
+        document.getElementById(`faceDiffMinus_${id}`)?.addEventListener('click', () => window.changeQty(id, 'faceDiff', -1));
+        document.getElementById(`faceDiffPlus_${id}`)?.addEventListener('click', () => window.changeQty(id, 'faceDiff', 1));
+        document.getElementById(`poseDiffMinus_${id}`)?.addEventListener('click', () => window.changeQty(id, 'poseDiff', -1));
+        document.getElementById(`poseDiffPlus_${id}`)?.addEventListener('click', () => window.changeQty(id, 'poseDiff', 1));
+        document.getElementById(`clothDiffMinus_${id}`)?.addEventListener('click', () => window.changeQty(id, 'clothDiff', -1));
+        document.getElementById(`clothDiffPlus_${id}`)?.addEventListener('click', () => window.changeQty(id, 'clothDiff', 1));
+
+        if (id > 1) {
+            document.getElementById(`removeBtn_${id}`)?.addEventListener('click', () => window.removeCard(id));
+        }
+    };
+
+    window.addNewCard = function() {
+        cardCount++;
+        const container = document.getElementById('illustrationContainer');
+        const tabWrapper = document.getElementById('tabWrapper');
+        
+        const tabHtml = `<button type="button" class="tab-button" id="tabBtn_${cardCount}">ILLUSTRATION #${cardCount}</button>`;
+        tabWrapper.insertAdjacentHTML('beforeend', tabHtml);
+
+        const currentId = cardCount;
+        document.getElementById(`tabBtn_${currentId}`).addEventListener('click', () => {
+            window.switchTab(currentId);
+        });
+
+        const cardHtml = `
+            <div class="illustration-card" id="card_${cardCount}">
+                <div class="card-header">
+                    <h3 class="card-title">ILLUSTRATION #${cardCount} (${cardCount}枚目)</h3>
+                    ${cardCount > 1 ? `<button type="button" class="remove-card-btn" id="removeBtn_${cardCount}">REMOVE (削除)</button>` : ''}
+                </div>
+
+                <div class="section-title">01. SELECT BASE TYPE (必須)</div>
+                <div class="form-group">
+                    <label><input type="radio" name="base_${cardCount}" value="face" id="base_face_${cardCount}"> <span>フェイスアップ</span> <span class="price-text">9,000円</span></label>
+                </div>
+                <div class="form-group">
+                    <label><input type="radio" name="base_${cardCount}" value="bust" id="base_bust_${cardCount}"> <span>バストアップ</span> <span class="price-text">11,000円</span></label>
+                </div>
+                <div class="form-group">
+                    <label><input type="radio" name="base_${cardCount}" value="full" id="base_full_${cardCount}"> <span>全身</span> <span class="price-text">12,000円</span></label>
+                </div>
+
+                <div class="options-wrapper locked" id="optionsWrapper_${cardCount}">
+                    <div class="section-title">02. BACKGROUND OPTIONS (任意)</div>
+                    <div class="form-group">
+                        <label><input type="radio" name="bg_${cardCount}" value="none" id="bg_none_${cardCount}" checked> <span>背景なし (単色/透過/グラデ)</span> <span class="price-text">+0円</span></label>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="radio" name="bg_${cardCount}" value="simple" id="bg_simple_${cardCount}"> <span>簡易背景 (パターン/エフェクト)</span> <span class="price-text">+2,000円</span></label>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="radio" name="bg_${cardCount}" value="custom" id="bg_custom_${cardCount}"> <span>しっかり背景: 構図指定あり</span> <span class="price-text">+3,000円</span></label>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="radio" name="bg_${cardCount}" value="random" id="bg_random_${cardCount}"> <span>しっかり背景: おまかせ (構図考案料込)</span> <span class="price-text">+6,000円</span></label>
+                    </div>
+
+                    <div class="section-title">03. ADDITIONAL OPTIONS (任意)</div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="faceDiffCheck_${cardCount}"> <span>表情差分</span> <span class="price-text">+500円 / 枚</span></label>
+                        <div class="qty-container">
+                            <button type="button" class="qty-btn" id="faceDiffMinus_${cardCount}">-</button>
+                            <input type="text" id="faceDiffQty_${cardCount}" class="qty-input" value="0" readonly>
+                            <button type="button" class="qty-btn" id="faceDiffPlus_${cardCount}">+</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="poseDiffCheck_${cardCount}"> <span>ポーズ差分</span> <span class="price-text">+700円 / 枚</span></label>
+                        <div class="qty-container">
+                            <button type="button" class="qty-btn" id="poseDiffMinus_${cardCount}">-</button>
+                            <input type="text" id="poseDiffQty_${cardCount}" class="qty-input" value="0" readonly>
+                            <button type="button" class="qty-btn" id="poseDiffPlus_${cardCount}">+</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="clothDiffCheck_${cardCount}"> <span>服装差分</span> <span class="price-text">+1,000円 / 枚</span></label>
+                        <div class="qty-container">
+                            <button type="button" class="qty-btn" id="clothDiffMinus_${cardCount}">-</button>
+                            <input type="text" id="clothDiffQty_${cardCount}" class="qty-input" value="0" readonly>
+                            <button type="button" class="qty-btn" id="clothDiffPlus_${cardCount}">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.insertAdjacentHTML('beforeend', cardHtml);
+        
+        // 即座にイベントをバインド（setTimeoutを使わないことでクラッシュを防止）
+        window.bindCardEvents(currentId);
+        
+        window.switchTab(currentId);
+        window.calculate();
+    };
+
+    window.removeCard = function(id) {
+        const card = document.getElementById(`card_${id}`);
+        const tab = document.getElementById(`tabBtn_${id}`);
+        if (card) card.remove();
+        if (tab) tab.remove();
+
+        const remainingCards = document.querySelectorAll('.illustration-card');
+        if (remainingCards.length > 0) {
+            const lastCardId = remainingCards[remainingCards.length - 1].id.split('_')[1];
+            window.switchTab(lastCardId);
+        }
+        window.calculate();
+    };
+
+    window.onBaseSelect = function(id) {
+        const wrapper = document.getElementById(`optionsWrapper_${id}`);
+        if (wrapper) { wrapper.classList.remove('locked'); }
+        window.calculate();
+    };
+
+    window.changeQty = function(id, type, val) {
+        const checkbox = document.getElementById(`${type}Check_${id}`);
+        if (!checkbox || !checkbox.checked) return;
+        const input = document.getElementById(`${type}Qty_${id}`);
+        if (!input) return;
+        let current = parseInt(input.value) + val;
+        if (current < 0) current = 0;
+        input.value = current;
+        window.calculate();
+    };
+
+    window.toggleQty = function(id, type) {
+        const checkbox = document.getElementById(`${type}Check_${id}`);
+        const input = document.getElementById(`${type}Qty_${id}`);
+        if (!checkbox || !input) return;
+        if (!checkbox.checked) { input.value = 0; } 
+        else if (input.value == 0) { input.value = 1; }
+        window.calculate();
+    };
+
+    window.goToConfirmPage = function(event) {
+        event.preventDefault();
+        const form = document.getElementById('orderForm');
+        const cardsData = [];
+        const cards = document.querySelectorAll('.illustration-card');
+
+        cards.forEach(card => {
+            const id = card.id.split('_')[1];
+            const baseRadio = form.elements[`base_${id}`] ? form.elements[`base_${id}`].value : '';
+            const bgRadio = form.elements[`bg_${id}`] ? form.elements[`bg_${id}`].value : 'none';
+            
+            const fQtyEl = document.getElementById(`faceDiffQty_${id}`);
+            const pQtyEl = document.getElementById(`poseDiffQty_${id}`);
+            const cQtyEl = document.getElementById(`clothDiffQty_${id}`);
+
+            const faceDiff = fQtyEl ? (parseInt(fQtyEl.value) || 0) : 0;
+            const poseDiff = pQtyEl ? (parseInt(pQtyEl.value) || 0) : 0;
+            const clothDiff = cQtyEl ? (parseInt(cQtyEl.value) || 0) : 0;
+
+            if(baseRadio) {
+                cardsData.push({
+                    base: baseRadio, bg: bgRadio, faceDiff: faceDiff, poseDiff: poseDiff, clothDiff: clothDiff
+                });
+            }
+        });
+
+        const estimateSummary = {
+            cards: cardsData,
+            rawSubtotal: window.lastCalculatedRawSubtotal || 0,
+            discountRate: window.lastCalculatedDiscountRate || 0,
+            discountPercent: window.lastCalculatedDiscountPercent || 0,
+            discountAmount: window.lastCalculatedDiscountAmount || 0,
+            finalTotal: window.lastCalculatedFinalTotal || 0
+        };
+
+        localStorage.setItem('currentEstimate', JSON.stringify(estimateSummary));
+        window.location.href = 'confirm.html';
+    };
+
+    window.calculate = function() {
+        const form = document.getElementById('orderForm');
+        let rawSubtotal = 0; 
+        let activeCardCount = 0; 
+        let allBasesSelected = true;
+
+        const cards = document.querySelectorAll('.illustration-card');
+        if (cards.length === 0) { allBasesSelected = false; }
+
+        cards.forEach(card => {
+            const id = card.id.split('_')[1];
+            const baseRadio = form.elements[`base_${id}`] ? form.elements[`base_${id}`].value : '';
+            const bgRadio = form.elements[`bg_${id}`] ? form.elements[`bg_${id}`].value : 'none';
+
+            if (!baseRadio) {
+                allBasesSelected = false;
+                return; 
+            }
+
+            activeCardCount++;
+            rawSubtotal += PRICES.base[baseRadio] || 0;
+            rawSubtotal += PRICES.bg[bgRadio] || 0;
+
+            ['faceDiff', 'poseDiff', 'clothDiff'].forEach(type => {
+                const qtyInput = document.getElementById(`${type}Qty_${id}`);
+                if (qtyInput) {
+                    rawSubtotal += (PRICES.diff[type] || 0) * (parseInt(qtyInput.value) || 0);
+                }
+            });
+        });
+
+        let discountRate = 0; 
+        if (activeCardCount === 2) { discountRate = 0.05; } 
+        else if (activeCardCount >= 3) { discountRate = 0.10; }
+
+        const discountAmount = Math.floor(rawSubtotal * discountRate); 
+        const finalTotal = rawSubtotal - discountAmount; 
+
+        window.lastCalculatedRawSubtotal = rawSubtotal;
+        window.lastCalculatedDiscountRate = discountRate;
+        window.lastCalculatedDiscountPercent = (discountRate * 100);
+        window.lastCalculatedDiscountAmount = discountAmount;
+        window.lastCalculatedFinalTotal = finalTotal;
+
+        const subtotalWrapper = document.getElementById('subtotalWrapper');
+        const discountWrapper = document.getElementById('discountWrapper');
+
+        if (discountRate > 0 && rawSubtotal > 0) {
+            if(subtotalWrapper) subtotalWrapper.style.display = 'block';
+            if(discountWrapper) discountWrapper.style.display = 'block';
+            document.getElementById('subtotalDisplay').innerText = rawSubtotal.toLocaleString() + " 円";
+            document.getElementById('discountPercent').innerText = (discountRate * 100).toString();
+            document.getElementById('discountDisplay').innerText = discountAmount.toLocaleString() + " 円";
+        } else {
+            if(subtotalWrapper) subtotalWrapper.style.display = 'none';
+            if(discountWrapper) discountWrapper.style.display = 'none';
+        }
+
+        document.getElementById('totalDisplay').innerText = finalTotal.toLocaleString() + " 円";
+        document.getElementById('addCardBtn').disabled = !allBasesSelected;
+        
+        const submitBtn = document.getElementById('submitBtn');
+        if (window.currentSiteModeIsStop) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = "ORDERS CURRENTLY CLOSED";
+        } else {
+            if (allBasesSelected && finalTotal > 0) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "SEND ESTIMATION FOR CONSULTATION";
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.innerText = "SELECT BASE TYPE TO PROCEED";
+            }
+        }
+    };
+
+    // ★安全性をMAXまで高めたデータ復元処理（タイマー依存を完全に排除）
+    window.loadSavedEstimate = function() {
+        const rawData = localStorage.getItem('currentEstimate');
+        if (!rawData) {
+            window.addNewCard();
+            return;
+        }
+
+        const data = JSON.parse(rawData);
+        if (!data.cards || data.cards.length === 0) {
+            window.addNewCard();
+            return;
+        }
+
+        // 復元処理を順番に同期実行する
+        data.cards.forEach((cardData, idx) => {
+            window.addNewCard(); // これにより、cardCountがインクリメントされ要素が作成される
+            const currentId = idx + 1;
+
+            // 即座に値を流し込む（すでにHTMLとイベント紐付けは完了しているため安全）
+            const baseRadio = document.getElementById(`base_${cardData.base}_${currentId}`);
+            if (baseRadio) {
+                baseRadio.checked = true;
+                window.onBaseSelect(currentId); // 任意オプションのロック解除
+            }
+
+            const bgRadio = document.getElementById(`bg_${cardData.bg}_${currentId}`);
+            if (bgRadio) bgRadio.checked = true;
+
+            ['faceDiff', 'poseDiff', 'clothDiff'].forEach(type => {
+                const qty = cardData[type] || 0;
+                if (qty > 0) {
+                    const check = document.getElementById(`${type}Check_${currentId}`);
+                    const input = document.getElementById(`${type}Qty_${currentId}`);
+                    if (check) check.checked = true;
+                    if (input) input.value = qty;
+                }
+            });
+        });
+
+        // すべての復元が完了した後に、1枚目のタブを選択状態にして最終計算
+        window.switchTab(1);
+        window.calculate();
+    };
+
+    document.getElementById('addCardBtn').addEventListener('click', window.addNewCard);
+    document.getElementById('orderForm').addEventListener('submit', window.goToConfirmPage);
+
+    // ページの全要素が準備できた時点で自動実行
+    window.loadSavedEstimate();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('mode') === 'stop') {
+        window.currentSiteModeIsStop = true;
+        document.getElementById('normalScheduleBox').style.display = 'none';
+        document.getElementById('stopAlertBox').style.display = 'block';
+        window.calculate();
+    }
+</script>
+</body>
+</html>
