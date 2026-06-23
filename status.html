@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORDER PROGRESS - busuzimayako85</title>
+    <style>
+        /* 共通の世界観・パンク風ダークモード */
+        body {
+            background-color: #0b0b0b;
+            color: #f0f0f0;
+            font-family: 'Impact', 'Arial Black', 'Hiragino Kaku Gothic ProN', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .status-container {
+            width: 90%;
+            max-width: 600px;
+            background: #111;
+            border: 2px solid #00e5ff; /* 進捗画面はサイバーブルーを基調に */
+            padding: 40px;
+            border-radius: 6px;
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.2);
+            box-sizing: border-box;
+            margin: 20px 0;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 28px;
+            letter-spacing: 2px;
+            color: #ffffff;
+            border-bottom: 2px solid #00e5ff;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+
+        /* ─── ステータスバッジ（大きな進捗表示） ─── */
+        .status-badge-box {
+            margin-top: 25px;
+            padding: 30px 20px;
+            background: #001215;
+            border: 1px solid #00e5ff;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .status-label {
+            font-size: 13px;
+            color: #aaa;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .status-text {
+            font-size: 36px;
+            font-weight: bold;
+            color: #00e5ff;
+            text-shadow: 0 0 15px rgba(0, 229, 255, 0.8);
+            letter-spacing: 1px;
+        }
+        /* ステータスに応じた動的カラーチェンジ用 */
+        .status-text.status-対応中 { color: #ffea00; text-shadow: 0 0 15px rgba(255, 234, 0, 0.8); }
+        .status-text.status-完了 { color: #00e676; text-shadow: 0 0 15px rgba(0, 230, 118, 0.8); }
+
+        /* ─── 詳細内訳ボックス ─── */
+        .details-box {
+            background: #161616;
+            border: 1px solid #222;
+            padding: 20px;
+            border-radius: 4px;
+            margin-top: 25px;
+        }
+        .client-name-title {
+            font-size: 16px;
+            color: #fff;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 8px;
+        }
+        .item-row {
+            padding: 10px 0;
+            border-bottom: 1px dashed #333;
+            font-size: 14px;
+            color: #ccc;
+            line-height: 1.6;
+        }
+        .item-row:last-child { border-bottom: none; }
+        .bullet-item { display: block; padding-left: 15px; color: #aaa; }
+
+        /* メッセージやお知らせ等 */
+        .notice-box {
+            margin-top: 25px;
+            background: #1a1a1a;
+            border-left: 3px solid #ff0055;
+            padding: 15px;
+            font-size: 13px;
+            color: #bbb;
+            line-height: 1.6;
+        }
+
+        /* エラー／迷子用画面 */
+        .error-message {
+            text-align: center;
+            padding: 30px 10px;
+            color: #ff5252;
+        }
+
+        .home-btn {
+            display: block;
+            width: 100%;
+            background: #222;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 15px;
+            font-size: 15px;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            margin-top: 30px;
+            box-sizing: border-box;
+            border-radius: 4px;
+        }
+        .home-btn:hover { background: #333; border-color: #666; }
+    </style>
+</head>
+<body>
+
+<div class="status-container">
+    <h1>ORDER PROGRESS</h1>
+
+    <div id="statusContent">
+        <p style="text-align: center; color: #666; font-size: 14px; padding: 4px 0;">データを読み込んでいます...</p>
+    </div>
+
+    <a href="index.html" class="home-btn">← 見積もりトップページに戻る</a>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+    // Firebaseの設定
+    const firebaseConfig = {
+        apiKey: "AIzaSyDi4twz34suKR2KXztm19FbUF-dtJN4OQU",
+        authDomain: "busuzimayako85-order.firebaseapp.com",
+        projectId: "busuzimayako85-order",
+        storageBucket: "busuzimayako85-order.firebasestorage.app",
+        messagingSenderId: "921095725285",
+        appId: "1:921095725285:web:d65f6accf6ddb28765f40c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // コード翻訳辞書
+    const TRANSLATIONS = {
+        base: { face: 'フェイスアップ', bust: 'バストアップ', full: '全身' },
+        bg: { none: '背景なし', simple: '簡易背景', custom: 'しっかり背景(指定あり)', random: 'しっかり背景(おまかせ)' }
+    };
+
+    // URLのパラメータから ?id=xxxxxx を抽出する関数
+    function getOrderIdFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('id');
+    }
+
+    function initStatusPage() {
+        const orderId = getOrderIdFromUrl();
+        const container = document.getElementById('statusContent');
+
+        // URLにIDが含まれていない場合のエラー処理
+        if (!orderId) {
+            container.innerHTML = `
+                <div class="error-message">
+                    <h3>⚠️ URLが正しくありません</h3>
+                    <p style="font-size:13px; color:#aaa; line-height:1.6;">
+                        進捗確認ページのIDが見つかりません。お見積もり完了時に発行された専用のURLからアクセスしてください。
+                    </p>
+                </div>
+            `;
+            return;
+        }
+
+        // Firestoreのドキュメントをリアルタイム(onSnapshot)に監視
+        const docRef = doc(db, "orders", orderId);
+        onSnapshot(docRef, (docSnap) => {
+            if (!docSnap.exists()) {
+                container.innerHTML = `
+                    <div class="error-message">
+                        <h3>⚠️ データが見つかりません</h3>
+                        <p style="font-size:13px; color:#aaa; line-height:1.6;">
+                            該当のご依頼データが確認できないか、すでに制作・お取引が完了してデータが整理（削除）された可能性があります。
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            const data = docSnap.data();
+            const currentStatus = data.status || "未対応";
+
+            // イラストの内訳HTMLをループ生成
+            let detailsHtml = '';
+            if (Array.isArray(data.details)) {
+                data.details.forEach((item, idx) => {
+                    const bName = TRANSLATIONS.base[item.base] || item.base;
+                    const bgName = TRANSLATIONS.bg[item.bg] || item.bg;
+                    
+                    let diffs = [];
+                    if (item.faceDiff > 0) diffs.push(`表情差分×${item.faceDiff}`);
+                    if (item.poseDiff > 0) diffs.push(`ポーズ差分×${item.poseDiff}`);
+                    if (item.clothDiff > 0) diffs.push(`服装差分×${item.clothDiff}`);
+                    const diffsStr = diffs.length > 0 ? diffs.join(', ') : 'なし';
+
+                    detailsHtml += `
+                        <div class="item-row">
+                            🎨 <strong>イラスト #${idx + 1}</strong>
+                            <span class="bullet-item">・ベース: ${bName}</span>
+                            <span class="bullet-item">・背景: ${bgName}</span>
+                            <span class="bullet-item">・差分: ${diffsStr}</span>
+                        </div>
+                    `;
+                });
+            }
+
+            // 状況に合わせたアナウンスの切り替え
+            let noticeMessage = "ご相談メッセージを受信しました。内容を確認し、毒島より折り返しご連絡（DMまたはメール）いたしますので、今しばらくお待ちください。";
+            if (currentStatus === "対応中") {
+                noticeMessage = "現在、打ち合わせまたは制作が進行中のステータスです。詳細な進捗のやりとりは、直接のDMやメール等をご確認ください。";
+            } else if (currentStatus === "完了") {
+                noticeMessage = "この度のご依頼はすべての工程が完了いたしました！ありがとうございました！";
+            }
+
+            // HTMLの書き換え反映
+            container.innerHTML = `
+                <div class="status-badge-box">
+                    <div class="status-label">CURRENT STATUS (現在の制作状況)</div>
+                    <div class="status-text status-${currentStatus}">
+                        ${currentStatus === '未対応' ? '🔴 未対応' : currentStatus === '対応中' ? '🟡 対応中' : '🟢 完了'}
+                    </div>
+                </div>
+
+                <div class="details-box">
+                    <div class="client-name-title">👤 <strong>${escapeHtml(data.clientName)} 様</strong> のご依頼内容</div>
+                    ${detailsHtml}
+                    <div class="item-row" style="border-bottom:none; font-weight:bold; color:#ff0055;">
+                        💰 概算合計金額: ${(data.finalTotal || 0).toLocaleString()} 円
+                    </div>
+                </div>
+
+                <div class="notice-box">
+                    ${noticeMessage}
+                </div>
+            `;
+        }, (error) => {
+            console.error("Firestore通信エラー:", error);
+            container.innerHTML = `<div class="error-message"><p>データの読み込み中にエラーが発生しました。</p></div>`;
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    // 起動
+    initStatusPage();
+</script>
+</body>
+</html>
