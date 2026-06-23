@@ -659,7 +659,7 @@
 
     window.loadSavedEstimate();
 
-        onSnapshot(doc(db, "settings", "schedule"), (docSnap) => {
+    onSnapshot(doc(db, "settings", "schedule"), (docSnap) => {
         if (docSnap.exists()) {
             const data = docSnap.data();
             const isStop = (data.mode === 'stop');
