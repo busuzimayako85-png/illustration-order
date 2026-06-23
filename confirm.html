@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CONFIRM ORDER - busuzimayako85</title>
+    <title>CONFIRM YOUR ESTIMATION - busuzimayako85</title>
     <style>
-        /* index.htmlと統一したパンク・ダークモードスタイル */
+        /* index.html のデザインを完全引き継ぎ */
         body {
             background-color: #0b0b0b;
             color: #f0f0f0;
@@ -13,375 +13,302 @@
             margin: 0;
             padding: 0;
             display: flex;
+            justify-content: center;
+            align-items: center;
             min-height: 100vh;
         }
 
-        /* ─── 画面左側：固定看板エリア ─── */
-        .left-panel {
-            width: 40%;
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            background: #000000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border-right: 4px solid #ff0055;
-            box-sizing: border-box;
-            padding: 4px;
-        }
-
-        .logo-area {
-            width: 80%;
-            max-width: 350px;
-            aspect-ratio: 1;
-            background: #111;
-            border: 2px dashed #7cfc00;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #555;
-            text-align: center;
-            margin-bottom: 20px;
-            box-shadow: 0 0 20px rgba(255, 0, 85, 0.2);
-        }
-
-        .info-text {
-            color: #7cfc00;
-            font-size: 14px;
-            letter-spacing: 2px;
-            text-shadow: 0 0 5px rgba(124, 252, 0, 0.5);
-            margin-bottom: 10px;
-        }
-
-        /* ─── 画面右側：メインコンテンツ ─── */
-        .right-panel {
-            width: 60%;
-            margin-left: 40%;
-            padding: 50px;
-            box-sizing: border-box;
-        }
-
-        /* 確認画面のコンテナ */
         .confirm-container {
+            width: 90%;
+            max-width: 600px;
             background: #111;
-            border: 1px solid #222;
-            padding: 30px;
+            border: 2px solid #ff0055;
+            padding: 40px;
             border-radius: 6px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            margin-bottom: 30px;
+            box-shadow: 0 0 25px rgba(255, 0, 85, 0.3);
+            box-sizing: border-box;
+            margin: 20px 0;
         }
 
-        h2 {
-            font-size: 22px;
+        h1 {
+            margin-top: 0;
+            font-size: 28px;
+            letter-spacing: 2px;
+            color: #ffffff;
             border-bottom: 2px solid #ff0055;
             padding-bottom: 10px;
-            margin-top: 0;
-            margin-bottom: 20px;
-            letter-spacing: 1px;
+            text-align: center;
         }
 
-        /* 各イラスト内容のカードブロック */
-        .summary-card {
+        .summary-box {
             background: #161616;
-            border-left: 4px solid #7cfc00;
+            border: 1px solid #222;
             padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 0 4px 4px 0;
-        }
-        .summary-card h3 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 16px;
-            color: #7cfc00;
-            letter-spacing: 1px;
-        }
-
-        .summary-item {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            margin-bottom: 8px;
-            border-bottom: 1px dashed #222;
-            padding-bottom: 4px;
-        }
-        .summary-item .label { color: #aaa; }
-        .summary-item .value { color: #fff; font-weight: bold; }
-
-        /* 金額サマリーボックス */
-        .price-summary-box {
-            background: #1a0007;
-            border: 2px solid #ff0055;
-            padding: 25px;
             border-radius: 4px;
-            margin-top: 30px;
+            margin-top: 25px;
         }
 
-        .price-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            font-size: 15px;
+        .item-row {
+            padding: 12px 0;
+            border-bottom: 1px dashed #333;
+            font-size: 14px;
+            color: #e0e0e0;
+            line-height: 1.6;
         }
-        .price-row.total {
-            border-top: 1px solid #ff0055;
-            padding-top: 15px;
-            margin-top: 15px;
+        .item-row:last-child { border-bottom: none; }
+
+        .bullet-item {
+            display: block;
+            padding-left: 15px;
+            color: #ccc;
         }
-        .price-row.total .price-val {
-            font-size: 32px;
-            color: #ff0055;
+
+        /* 合計金額エリア */
+        .total-box {
+            margin-top: 30px;
+            padding: 20px;
+            background: #1a0007;
+            border: 1px solid #ff0055;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .total-price {
+            font-size: 36px;
             font-weight: bold;
-            text-shadow: 0 0 10px rgba(255, 0, 85, 0.6);
+            color: #ff0055;
+            text-shadow: 0 0 15px rgba(255, 0, 85, 0.8);
+            margin-top: 5px;
         }
 
-        /* メール用テキストエリア */
-        .textarea-title {
-            font-size: 16px;
+        /* フォーム入力欄 */
+        .form-section {
+            margin-top: 35px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-label {
+            font-size: 14px;
             color: #7cfc00;
-            margin-top: 30px;
-            margin-bottom: 10px;
+            text-shadow: 0 0 5px rgba(124, 252, 0, 0.3);
+            margin-bottom: 8px;
+            display: block;
             letter-spacing: 1px;
         }
-        .mail-template-area {
+        .input-field {
             width: 100%;
-            height: 250px;
+            padding: 12px 15px;
             background: #000;
             color: #7cfc00;
             border: 1px solid #333;
-            padding: 15px;
+            border-radius: 4px;
             box-sizing: border-box;
-            font-family: monospace;
-            font-size: 13px;
-            line-height: 1.6;
-            resize: vertical;
-        }
-
-        /* ボタン群 */
-        .btn-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
-        }
-        .back-btn {
-            width: 35%;
-            background: #222;
-            color: #fff;
-            border: 1px solid #444;
-            padding: 18px;
             font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
+            font-family: inherit;
         }
-        .back-btn:hover { background: #333; border-color: #666; }
+        .input-field:focus {
+            border-color: #ff0055;
+            outline: none;
+            box-shadow: 0 0 10px rgba(255, 0, 85, 0.3);
+        }
+        
+        /* 複数行テキストエリア用の高さ指定 */
+        textarea.input-field {
+            resize: vertical;
+            min-height: 100px;
+        }
 
+        /* ボタン */
         .action-btn {
-            width: 65%;
+            width: 100%;
             background: #ff0055;
             color: white;
             border: none;
             padding: 18px;
             font-size: 18px;
             font-weight: bold;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             cursor: pointer;
+            margin-top: 15px;
             box-shadow: 0 4px 0 #b3003b;
-            transition: all 0.2s;
         }
-        .action-btn:hover { background: #ff266f; box-shadow: 0 0 15px rgba(255, 0, 85, 0.4); }
-
-        /* エラー時用メッセージ */
-        .error-message {
-            color: #ff3333;
-            background: #2a0000;
-            border: 1px solid #ff0000;
-            padding: 20px;
-            border-radius: 4px;
+        .action-btn:hover {
+            background: #ff266f;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.6);
+        }
+        .back-link {
+            display: block;
             text-align: center;
-            font-weight: bold;
+            margin-top: 20px;
+            color: #888;
+            font-size: 13px;
+            text-decoration: none;
         }
-
-        @media (max-width: 900px) {
-            body { flex-direction: column; }
-            .left-panel { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 4px solid #ff0055; padding: 40px 20px; }
-            .right-panel { width: 100%; margin-left: 0; padding: 20px; }
-        }
+        .back-link:hover { color: #fff; }
     </style>
 </head>
 <body>
 
-    <div class="left-panel">
-        <div class="logo-area">
-            <p style="padding: 20px; font-size: 14px;">[ ロゴ画像 <br>image_64c9bf.jpg ]</p>
-        </div>
-        <div class="info-text">busuzimayako85</div>
-        <div style="font-size: 12px; color: #666;">ILLUSTRATION ONLINE ORDER SYSTEM</div>
+<div class="confirm-container">
+    <h1>ESTIMATION CONFIRM</h1>
+    
+    <p style="font-size: 13px; color: #aaa; text-align: center; margin-top: 10px;">ご選択いただいたお見積もりシミュレーションの内容です。</p>
+
+    <div class="summary-box" id="summaryList">
+        <p style="color: #666; text-align: center; font-size: 14px;">読み込み中...</p>
     </div>
 
-    <div class="right-panel">
-        <h1 style="margin-top: 0; font-size: 32px; letter-spacing: 2px;">CONFIRM YOUR ESTIMATION</h1>
-
-        <div id="errorWrapper" style="display: none;" class="error-message">
-            見積もりデータが見つかりません。お手数ですが注文ページからやり直してください。
-            <br><br>
-            <button type="button" class="back-btn" style="width: auto; padding: 10px 20px; margin-top: 10px;" onclick="location.href='index.html'">注文ページに戻る</button>
-        </div>
-
-        <div id="contentWrapper">
-            <div class="confirm-container">
-                <h2>ORDER DETAILS (選択内容)</h2>
-                
-                <!-- ここに動的にイラストカード情報が追加されます -->
-                <div id="summaryCardsContainer"></div>
-
-                <!-- 金額サマリー -->
-                <div class="price-summary-box">
-                    <div class="price-row">
-                        <span class="price-label">SUBTOTAL (小計)</span>
-                        <span class="price-val" id="summarySubtotal">0 円</span>
-                    </div>
-                    <div class="price-row" id="summaryDiscountRow" style="display: none; color: #7cfc00;">
-                        <span class="price-label">MULTIPLE DISCOUNT (複数枚割引: <span id="summaryDiscountPercent">0</span>%)</span>
-                        <span class="price-val">-<span id="summaryDiscountAmount">0</span> 円</span>
-                    </div>
-                    <div class="price-row total">
-                        <span class="price-label" style="font-weight: bold; letter-spacing: 1px;">ESTIMATED TOTAL (概算合計金額)</span>
-                        <span class="price-val" id="summaryTotal">0 円</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="textarea-title">✉️ COPY FOR CONSULTATION (お問い合わせ用テンプレート)</div>
-            <p style="font-size: 13px; color: #aaa; margin-top: 0; margin-bottom: 10px;">
-                以下の内容が自動生成されました。ご依頼の際はこのテキストをコピーしてメール、またはDM等に貼り付けてご連絡ください。
-            </p>
-            <textarea id="mailTemplate" class="mail-template-area" readonly></textarea>
-
-            <div class="btn-group">
-                <button type="button" class="back-btn" onclick="location.href='index.html'">← BACK (修正する)</button>
-                <button type="button" class="action-btn" id="copyBtn">COPY TEXT & FINISH (テキストをコピーして完了)</button>
-            </div>
-        </div>
+    <div class="total-box">
+        <div style="font-size: 12px; color: #aaa; letter-spacing: 1px;">ESTIMATED TOTAL (概算合計金額)</div>
+        <div class="total-price" id="finalTotalDisplay">0 円</div>
     </div>
+
+    <div class="form-section">
+        <div class="input-group">
+            <span class="input-label">YOUR NAME (お名前 / ニックネーム可)</span>
+            <input type="text" id="clientName" class="input-field" placeholder="例: 毒島太郎">
+        </div>
+        <div class="input-group">
+            <span class="input-label">CONTACT INFO (ご連絡先: XのID、各種SNS、メールなど)</span>
+            <input type="text" id="clientContact" class="input-field" placeholder="例: X @busuzimayako85">
+        </div>
+
+        <div class="input-group">
+            <span class="input-label">FREE COMMENT (ご質問・ご要望などがあればご自由にどうぞ / 任意)</span>
+            <textarea id="clientComment" class="input-field" placeholder="例: キャラクターの詳細イメージや、希望する納期、ご質問などがあればご記入ください。"></textarea>
+        </div>
+
+        <button type="button" class="action-btn" id="submitBtn">SEND CONSULTATION (この内容で相談する)</button>
+        <a href="javascript:history.back();" class="back-link">← 見積もりをやり直す</a>
+    </div>
+</div>
 
 <script>
-    // コード値から日本語に変換するためのマッピング辞書
-    const TRANSLATIONS = {
-        base: { face: 'フェイスアップ (9,000円)', bust: 'バストアップ (11,000円)', full: '全身 (12,000円)' },
-        bg: { 
-            none: '背景なし (単色/透過/グラデ) (+0円)', 
-            simple: '簡易背景 (パターン/エフェクト) (+2,000円)', 
-            custom: 'しっかり背景: 構図指定あり (+3,000円)', 
-            random: 'しっかり背景: おまかせ (構図考案料込) (+6,000円)' 
+    function initConfirmPage() {
+        const estimateDataString = localStorage.getItem('currentEstimate');
+        if (!estimateDataString) {
+            // ローカル環境でのテスト用にダミーデータを表示
+            document.getElementById('finalTotalDisplay').innerText = "24,000 円";
+            document.getElementById('summaryList').innerHTML = `
+                <div class="item-row">
+                    🎨 <span style="color:#fff;">ILLUSTRATION #1</span> :
+                    <span class="bullet-item">・バストアップ</span>
+                    <span class="bullet-item">・簡易背景</span>
+                </div>
+                <div class="item-row" style="color:#666; font-size:12px; border-bottom:none;">※ローカル環境のため、モックデータを表示しています。テスト送信は可能です。</div>
+            `;
+            return;
         }
+
+        try {
+            const data = JSON.parse(estimateDataString);
+            
+            // 金額の表示
+            document.getElementById('finalTotalDisplay').innerText = data.finalTotal.toLocaleString() + " 円";
+
+            // 選択された内訳テキストの作成
+            const summaryList = document.getElementById('summaryList');
+            summaryList.innerHTML = ''; // クリア
+
+            // 各イラストカードの内訳を箇条書きで構築
+            data.cards.forEach((card, index) => {
+                const row = document.createElement('div');
+                row.className = 'item-row';
+                
+                let baseName = card.base === 'face' ? 'フェイスアップ' : card.base === 'bust' ? 'バストアップ' : '全身';
+                let bgName = '背景なし';
+                if(card.bg === 'simple') bgName = '簡易背景';
+                if(card.bg === 'custom') bgName = 'しっかり背景(指定あり)';
+                if(card.bg === 'random') bgName = 'しっかり背景(おまかせ)';
+
+                let contentHtml = `🎨 <span style="color:#fff;">ILLUSTRATION #${index + 1}</span> :`;
+                contentHtml += `<span class="bullet-item">・${baseName}</span>`;
+                contentHtml += `<span class="bullet-item">・${bgName}</span>`;
+
+                if(card.faceDiff > 0) contentHtml += `<span class="bullet-item">・表情差分 (${card.faceDiff}枚)</span>`;
+                if(card.poseDiff > 0) contentHtml += `<span class="bullet-item">・ポーズ差分 (${card.poseDiff}枚)</span>`;
+                if(card.clothDiff > 0) contentHtml += `<span class="bullet-item">・服装差分 (${card.clothDiff}枚)</span>`;
+
+                row.innerHTML = contentHtml;
+                summaryList.appendChild(row);
+            });
+
+            // 割引がある場合は割引の行も追加
+            if (data.discountAmount > 0) {
+                const discountRow = document.createElement('div');
+                discountRow.className = 'item-row';
+                discountRow.style.color = '#7cfc00';
+                discountRow.style.borderTop = '1px solid #333';
+                discountRow.style.marginTop = '10px';
+                discountRow.innerHTML = `🉐 複数枚割引 (${data.discountPercent}% OFF) : -${data.discountAmount.toLocaleString()} 円`;
+                summaryList.appendChild(discountRow);
+            }
+        } catch(e) {
+            console.error("データ解析エラー:", e);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", initConfirmPage);
+</script>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+    // Firebase接続設定
+    const firebaseConfig = {
+        apiKey: "AIzaSyDi4twz34suKR2KXztm19FbUF-dtJN4OQU",
+        authDomain: "busuzimayako85-order.firebaseapp.com",
+        projectId: "busuzimayako85-order",
+        storageBucket: "busuzimayako85-order.firebasestorage.app",
+        messagingSenderId: "921095725285",
+        appId: "1:921095725285:web:d65f6accf6ddb28765f40c"
     };
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const rawData = sessionStorage.getItem('currentEstimate');
-        
-        if (!rawData) {
-            document.getElementById('contentWrapper').style.display = 'none';
-            document.getElementById('errorWrapper').style.display = 'block';
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Firebase(Firestore) へ相談データを送信する処理
+    async function submitConsultation() {
+        const name = document.getElementById('clientName').value.trim();
+        const contact = document.getElementById('clientContact').value.trim();
+        const comment = document.getElementById('clientComment').value.trim(); // ★追加項目
+
+        if (!name || !contact) {
+            alert('お名前とご連絡先は必須入力です！');
             return;
         }
 
-        const data = JSON.parse(rawData);
-        const cards = data.cards || [];
-
-        if (cards.length === 0) {
-            document.getElementById('contentWrapper').style.display = 'none';
-            document.getElementById('errorWrapper').style.display = 'block';
-            return;
+        let estimateData = { cards: [{ base: "bust", bg: "simple", faceDiff: 0, poseDiff: 0, clothDiff: 0 }], finalTotal: 2400 };
+        const estimateDataString = localStorage.getItem('currentEstimate');
+        if (estimateDataString) {
+            estimateData = JSON.parse(estimateDataString);
         }
 
-        // 1. 各イラストカードの情報を画面に生成出力
-        const container = document.getElementById('summaryCardsContainer');
-        let templateText = "【busuzimayako85 イラストオーダーお見積り確認】\n";
-        templateText += "--------------------------------------------------\n";
-
-        cards.forEach((card, index) => {
-            const num = index + 1;
-            
-            // 日本語表記に変換
-            const baseTxt = TRANSLATIONS.base[card.base] || card.base;
-            const bgTxt = TRANSLATIONS.bg[card.bg] || card.bg;
-
-            // 差分の表示テキスト作成
-            let diffs = [];
-            if (card.faceDiff > 0) diffs.push(`表情差分 × ${card.faceDiff}枚`);
-            if (card.poseDiff > 0) diffs.push(`ポーズ差分 × ${card.poseDiff}枚`);
-            if (card.clothDiff > 0) diffs.push(`服装差分 × ${card.clothDiff}枚`);
-            const diffsTxt = diffs.length > 0 ? diffs.join('、') : 'なし';
-
-            // HTMLにカード要素を追加
-            const cardHtml = `
-                <div class="summary-card">
-                    <h3>ILLUSTRATION #${num} (${num}枚目)</h3>
-                    <div class="summary-item">
-                        <span class="label">ベースタイプ</span>
-                        <span class="value">${baseTxt}</span>
-                    </div>
-                    <div class="summary-item">
-                        <span class="label">背景オプション</span>
-                        <span class="value">${bgTxt}</span>
-                    </div>
-                    <div class="summary-item">
-                        <span class="label">追加オプション（差分）</span>
-                        <span class="value">${diffsTxt}</span>
-                    </div>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', cardHtml);
-
-            // テンプレート用テキストの構築
-            templateText += `■ イラスト ${num}枚目\n`;
-            templateText += ` ・ベース： ${baseTxt}\n`;
-            templateText += ` ・背 景： ${bgTxt}\n`;
-            templateText += ` ・差 分： ${diffsTxt}\n\n`;
-        });
-
-        // 2. 金額サマリーの画面反映
-        document.getElementById('summarySubtotal').innerText = data.rawSubtotal.toLocaleString() + " 円";
-        
-        if (data.discountPercent > 0) {
-            document.getElementById('summaryDiscountRow').style.display = 'flex';
-            document.getElementById('summaryDiscountPercent').innerText = data.discountPercent;
-            document.getElementById('summaryDiscountAmount').innerText = data.discountAmount.toLocaleString();
-        }
-
-        document.getElementById('summaryTotal').innerText = data.finalTotal.toLocaleString() + " 円";
-
-        // テンプレートテキストに金額情報を追加
-        templateText += "--------------------------------------------------\n";
-        templateText += `【小計金額】 ${data.rawSubtotal.toLocaleString()} 円\n`;
-        if (data.discountPercent > 0) {
-            templateText += `【複数枚割引】 -${data.discountAmount.toLocaleString()} 円 (${data.discountPercent}% OFF)\n`;
-        }
-        templateText += `【最終合計(概算)】 ${data.finalTotal.toLocaleString()} 円\n`;
-        templateText += "--------------------------------------------------\n";
-        templateText += "※上記内容にて制作の相談・見積もりをお願いいたします。";
-
-        // 3. テキストエリアへの格納
-        const textarea = document.getElementById('mailTemplate');
-        textarea.value = templateText;
-
-        // 4. コピーボタンの動作設定
-        document.getElementById('copyBtn').addEventListener('click', function() {
-            textarea.select();
-            textarea.setSelectionRange(0, 99999); // モバイル対応
-
-            navigator.clipboard.writeText(textarea.value).then(() => {
-                alert('お問い合わせ用テンプレートをクリップボードにコピーしました！\nメールやDMにペーストしてそのままご送信ください。');
-            }).catch(err => {
-                // クリップボードAPIが失敗した場合のフォールバック
-                alert('コピーに失敗しました。お手数ですがテキストエリア内の文字をすべて選択して手動でコピーしてください。');
+        try {
+            // Firestoreへ項目を追加して保存
+            await addDoc(collection(db, "orders"), {
+                clientName: name,
+                clientContact: contact,
+                clientComment: comment,               // ★新しく保存するフリーコメント
+                details: estimateData.cards,
+                finalTotal: estimateData.finalTotal,
+                status: "未対応",
+                createdAt: new Date()
             });
-        });
-    });
+
+            alert('ありがとうございます！相談メッセージが送信されました。毒島からの連絡をお待ちください。');
+            
+            localStorage.removeItem('currentEstimate');
+            window.location.href = 'index.html';
+
+        } catch (error) {
+            console.error("送信エラー:", error);
+            alert('送信に失敗しました。時間をおいて再度お試しください。: ' + error.message);
+        }
+    }
+
+    document.getElementById('submitBtn').addEventListener('click', submitConsultation);
 </script>
 </body>
 </html>
