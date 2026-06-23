@@ -132,61 +132,7 @@
         };
 
         // ★新設：Firestoreから送られてくるオーダー情報をリアルタイム監視して描画する関数
-        function listenToOrders() {
-            const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
-            
-            onSnapshot(q, (querySnapshot) => {
-                const orderListContainer = document.getElementById('orderListContainer');
-                orderListContainer.innerHTML = ''; // 一旦クリア
-
-                if (querySnapshot.empty) {
-                    orderListContainer.innerHTML = '<div class="no-orders">受信した依頼情報はまだありません。</div>';
-                    return;
-                }
-
-                querySnapshot.forEach((docSnap) => {
-                    const id = docSnap.id;
-                    const data = docSnap.data();
-
-                    // 日付フォーマット変換
-                    let dateStr = '---';
-                    if (data.createdAt) {
-                        const t = data.createdAt.toDate();
-                        dateStr = `${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()} ${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}`;
-                    }
-
-                    // イラスト詳細内訳HTMLの作成
-                    let detailsHtml = '';
-                    if (Array.isArray(data.details)) {
-                        data.details.forEach((item, idx) => {
-                            const bName = TRANSLATIONS.base[item.base] || item.base;
-                            const bgName = TRANSLATIONS.bg[item.bg] || item.bg;
-                            
-                            let diffs = [];
-                            if (item.faceDiff > 0) diffs.push(`表情差分×${item.faceDiff}`);
-                            if (item.poseDiff > 0) diffs.push(`ポーズ差分×${item.poseDiff}`);
-                            if (item.clothDiff > 0) diffs.push(`服装差分×${item.clothDiff}`);
-                            const diffsStr = diffs.length > 0 ? diffs.join(', ') : 'なし';
-
-                            detailsHtml += `
-                                <div style="margin-bottom:8px; ${idx > 0 ? 'border-top:1px dashed #333; padding-top:8px;' : ''}">
-                                    <div class="detail-item-title">🎨 イラスト #${idx + 1}</div>
-                                    <div class="detail-bullet">・ベース: ${bName}</div>
-                                    <div class="detail-bullet">・背景: ${bgName}</div>
-                                    <div class="detail-bullet">・差分オプション: ${diffsStr}</div>
-                                </div>
-                            `;
-                        });
-                    }
-
-                    // コメント欄の表示有無
-                    const commentHtml = data.clientComment 
-                        ? `<div class="comment-box"><strong>💬 メッセージ・要望:</strong><br>${escapeHtml(data.clientComment)}</div>` 
-                        : '';
-
-                    // ステータスのセレクトボックス選択状態設定
-                    const statusValue = data.status || "未対応";
-
+        // ↓ この部分（cardHtml = ` ... `）を以下のように差し替えてください
                     const cardHtml = `
                         <div class="order-card status-${statusValue}">
                             <div class="order-header">
@@ -220,10 +166,6 @@
                             </div>
                         </div>
                     `;
-                    orderListContainer.insertAdjacentHTML('beforeend', cardHtml);
-                });
-            });
-        }
 
         // ★新設：対応ステータスをその場で更新する関数
         window.updateOrderStatus = async function(id, newStatus) {
@@ -329,8 +271,8 @@
             }).catch(err => {
                 alert('コピーに失敗しました。以下のURLを手動でコピーしてください：\n' + statusUrl);
             });
-        };
-        
+     };
+
 </script>
 </body>
 </html>
