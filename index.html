@@ -229,6 +229,7 @@
         </div>
 
         <form id="orderForm">
+            <!-- タブコンテナ -->
             <div class="tab-wrapper" id="tabWrapper"></div>
 
             <div id="illustrationContainer"></div>
@@ -253,7 +254,7 @@
         diff: { faceDiff: 500, poseDiff: 700, clothDiff: 1000 }
     };
 
-    let uniqueIdCounter = 0; // システム内部追跡用のユニークなID（リセット・繰り上げで破綻しないため）
+    let uniqueIdCounter = 0; 
     window.currentSiteModeIsStop = false;
 
     window.switchTab = function(targetUniqueId) {
@@ -266,32 +267,31 @@
         if(targetCard) targetCard.classList.add('active');
     };
 
-    // タブ名とカード内の見出しの番号(1, 2, 3...)を常に綺麗に整列し直すファンクション
+    // ★すべてのカードの状態を見て削除ボタンの表示・非表示を再制御する仕組み
     window.refreshTabNumbers = function() {
         const cards = document.querySelectorAll('.illustration-card');
+        const totalCardsCount = cards.length;
+
         cards.forEach((card, index) => {
             const currentUniqueId = card.id.split('_')[1];
-            const displayNum = index + 1; // 1ベースの番号
+            const displayNum = index + 1; 
 
-            // タブのテキストを更新
+            // タブ名と見出しの連番を更新
             const tabBtn = document.getElementById(`tabBtn_${currentUniqueId}`);
-            if (tabBtn) {
-                tabBtn.innerText = `ILLUSTRATION #${displayNum}`;
-            }
+            if (tabBtn) tabBtn.innerText = `ILLUSTRATION #${displayNum}`;
 
-            // カード内のタイトルテキストを更新
             const cardTitle = card.querySelector('.card-title');
-            if (cardTitle) {
-                cardTitle.innerText = `ILLUSTRATION #${displayNum} (${displayNum}枚目)`;
-            }
+            if (cardTitle) cardTitle.innerText = `ILLUSTRATION #${displayNum} (${displayNum}枚目)`;
 
-            // 1枚目になったカードからは削除ボタンを消し、2枚目以降には削除ボタンを付与
+            // 削除ボタンの制御ロジック
             const header = card.querySelector('.card-header');
             let removeBtn = document.getElementById(`removeBtn_${currentUniqueId}`);
             
-            if (displayNum === 1) {
+            if (totalCardsCount === 1) {
+                // 残り1枚なら、1枚目だろうが何枚目だろうが削除ボタンを絶対に消す（画面消滅防止）
                 if (removeBtn) removeBtn.remove();
             } else {
+                // 2枚以上あるなら、1枚目を含むすべてのカードに削除ボタンを表示する
                 if (!removeBtn) {
                     const btnHtml = `<button type="button" class="remove-card-btn" id="removeBtn_${currentUniqueId}">REMOVE (削除)</button>`;
                     header.insertAdjacentHTML('beforeend', btnHtml);
@@ -329,7 +329,6 @@
         const container = document.getElementById('illustrationContainer');
         const tabWrapper = document.getElementById('tabWrapper');
         
-        // 最初は仮テキストで追加（直後のrefreshTabNumbersで正しい連番になる）
         const tabHtml = `<button type="button" class="tab-button" id="tabBtn_${currentId}">ILLUSTRATION</button>`;
         tabWrapper.insertAdjacentHTML('beforeend', tabHtml);
 
@@ -401,7 +400,6 @@
         container.insertAdjacentHTML('beforeend', cardHtml);
         window.bindCardEvents(currentId);
         
-        // ナンバリングを再計算
         window.refreshTabNumbers();
         window.switchTab(currentId);
         window.calculate();
@@ -410,16 +408,20 @@
     window.removeCard = function(id) {
         const card = document.getElementById(`card_${id}`);
         const tab = document.getElementById(`tabBtn_${id}`);
+        const wasActive = tab ? tab.classList.contains('active') : false;
+
         if (card) card.remove();
         if (tab) tab.remove();
 
-        // 削除後にナンバリングをすべて綺麗に1から詰め直す
         window.refreshTabNumbers();
 
-        const remainingCards = document.querySelectorAll('.illustration-card');
-        if (remainingCards.length > 0) {
-            const lastCardUniqueId = remainingCards[remainingCards.length - 1].id.split('_')[1];
-            window.switchTab(lastCardUniqueId);
+        // 削除されたタブが元々アクティブ（開かれている状態）だった場合のみ、別のタブに自動フォーカスする
+        if (wasActive) {
+            const remainingCards = document.querySelectorAll('.illustration-card');
+            if (remainingCards.length > 0) {
+                const lastCardUniqueId = remainingCards[remainingCards.length - 1].id.split('_')[1];
+                window.switchTab(lastCardUniqueId);
+            }
         }
         window.calculate();
     };
@@ -616,7 +618,6 @@
             });
         });
 
-        // 復元後、1枚目のタブを選択状態に
         const remainingCards = document.querySelectorAll('.illustration-card');
         if (remainingCards.length > 0) {
             const firstCardUniqueId = remainingCards[0].id.split('_')[1];
