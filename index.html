@@ -685,24 +685,26 @@
         if (docSnap.exists()) {
             const data = docSnap.data();
             const isStop = (data.mode === 'stop');
-            
-            // 画面の表示を切り替え
+        
+            // 1. 画面の表示・非表示を切り替え
             document.getElementById('normalScheduleBox').style.display = isStop ? 'none' : 'block';
             document.getElementById('stopAlertBox').style.display = isStop ? 'block' : 'none';
-            
-            
-            // 文字も更新するならここ（必要に応じて）
-            if (document.getElementById('currentSchedule')) {
-                document.getElementById('currentSchedule').innerText = data.text;
-            }
-
-            // システムを停止状態にする
+        
+            // 2. 文字をそれぞれの箱に流し込む
             if (isStop) {
+                // 停止中なら停止ボックスへ
+                document.getElementById('stopComment').innerText = data.text;
                 window.currentSiteModeIsStop = true;
-                window.calculate(); // 再計算してボタンを無効化
-            }
+            } else {
+                // 通常なら通常ボックスへ
+                document.getElementById('currentSchedule').innerText = data.text;
+                window.currentSiteModeIsStop = false;
+            }    
+            // 3. 再計算
+            window.calculate();
         }
     });
+    
 </script>
 </body>
 </html>
