@@ -150,6 +150,16 @@
             </div>
             `);
         });
+
+        // ログアウト処理
+        window.logout = () => {
+            if(confirm("ログアウトしてもよろしいですか？")) {
+                // セッションストレージのメモを削除
+                sessionStorage.removeItem('isAdminLoggedIn');
+                // ページをリロード（これで自動的にログイン画面に戻ります）
+                location.reload();
+            }
+        };
     }
 
     window.updateStatus = async (id, s) => await updateDoc(doc(db, "orders", id), { status: s });
