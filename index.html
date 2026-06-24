@@ -704,6 +704,15 @@
             window.calculate();
         }
     });
+
+    .catch((error) => {
+        // ★ここが重要：通信が失敗しても、通常営業モード（stopではない）としてフォームを表示させる
+        console.error("Firebaseの読み込みに失敗しましたが、フォームを表示します:", error);
+        document.getElementById('normalScheduleBox').style.display = 'block';
+        document.getElementById('stopAlertBox').style.display = 'none';
+        window.currentSiteModeIsStop = false;
+        window.calculate();
+    });
     
 </script>
 </body>
